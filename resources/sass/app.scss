@@ -1,0 +1,114 @@
+// Custom colors for Timedoor Academy
+$timedoor-green: #9AFF68;
+$timedoor-dark-green: #7AE648;
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.bg-timedoor-green {
+    background-color: $timedoor-green;
+}
+
+.header-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.course-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+}
+
+// Import font
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+// Variabel Warna
+$primary-green: #9AFF68;
+$dark-green: #7AE648;
+$light-green: #F0FFF4;
+$text-dark: #2D3748;
+$text-light: #4A5568;
+$gray-border: #E2E8F0;
+
+// Gaya dasar
+body {
+    font-family: 'Inter', sans-serif;
+    color: $text-dark;
+    line-height: 1.6;
+}
+
+.bg-light-green {
+    background-color: $light-green;
+}
+
+.dashboard-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 24px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.header-card {
+    padding: 24px;
+    text-align: center;
+    border-bottom: 2px solid $gray-border;
+    margin-bottom: 24px;
+
+    h1 {
+        font-size: 2.25rem; // 36px
+        font-weight: 700;
+        color: $primary-green;
+    }
+    p {
+        font-size: 1rem;
+        color: $text-light;
+    }
+}
+
+.button-primary {
+    background-color: $primary-green;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: $dark-green;
+    }
+}
+
+.schedule-item, .notification-item {
+    background-color: #f7fafc;
+    border: 1px solid $gray-border;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+}
