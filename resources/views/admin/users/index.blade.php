@@ -4,100 +4,91 @@
 
 @section('content')
 <style>
-    /* Styling untuk tombol "Tambah Pengguna Baru" */
-    .create-button-container { margin-bottom: 20px; }
-    .create-button {
-        display: inline-block;
-        background-color: #4CAF50; /* Warna hijau, sesuai tema admin */
-        color: white;
-        padding: 10px 15px;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background-color 0.3s ease;
-    }
-    .create-button:hover {
-        background-color: #45a049;
-    }
-    .dashboard-container { max-width: 900px; margin: 40px auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
-    th { background-color: #4CAF50; color: white; font-weight: bold; }
-    th.aksi-header, td.aksi-cell { text-align: center; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
-    tr:hover { background-color: #f1f1f1; }
-    .action-buttons-container { display: flex; gap: 8px; justify-content: center; align-items: center; }
-    .action-button { 
-        display: inline-block; 
-        padding: 8px 12px; 
-        border-radius: 6px; 
-        font-weight: bold; 
-        color: white; 
-        text-decoration: none; 
-        transition: background-color 0.3s ease; 
-        border: none; 
-        cursor: pointer; 
-        box-sizing: border-box; 
-        font-size: 14px; 
-        line-height: 1; 
-        white-space: nowrap; 
-    }
-    .edit-button { background-color: #ffc107; }
-    .edit-button:hover { background-color: #e0a800; }
-    .delete-button { background-color: #dc3545; }
-    .delete-button:hover { background-color: #c82333; }
-    .success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: center; }
+    /* Card & layout */
+    .container-users { margin-top: 24px; }
+    .card { background:#fff; border:1px solid rgba(0,0,0,.12); border-radius:0px; }
+    .card-header { padding:.9rem 1.25rem; background:rgba(0,0,0,.03); border-bottom:1px solid rgba(0,0,0,.12); }
+    .card-body { padding:1.25rem; }
+    .d-flex{display:flex} .justify-content-between{justify-content:space-between} .align-items-center{align-items:center}
+
+    /* Button utama (Tambah) */
+    .btn{display:inline-block; font-size:0.95rem; line-height:1.4; border-radius:.5rem; text-decoration:none; cursor:pointer; border:none}
+    .btn-success{background:#28a745; color:#fff; padding:.45rem .8rem} .btn-success:hover{background:#218838}
+
+    /* Tabel hijau + zebra abu (match Daftar Siswa) */
+    .table-wrap{overflow-x:auto}
+    .table{width:100%; border-collapse:separate; border-spacing:0; border-radius:0px; overflow:hidden; /* rounded inner */}
+    .table th, .table td{padding:12px 14px; border:1px solid #e5e7eb; text-align:left}
+    .table thead th{background:#43a047; color:#fff; font-weight:700; border-color:#3c8f42}
+    .table tbody tr:nth-child(odd){background:#ffffff}
+    .table tbody tr:nth-child(even){background:#f0f0f0}
+    .table tbody tr:hover{background:#e8f5e9}
+
+    /* Kolom aksi */
+    .col-actions{width:170px; white-space:nowrap; text-align:left}
+
+    /* Tombol aksi tipis, flat (seperti di halaman siswa) */
+    .btn-action{display:inline-block; font-size:.85rem; font-weight:600; padding:4px 12px; border:none; border-radius:8px; cursor:pointer; text-decoration:none; line-height:1.2}
+    .btn-edit{background:#ffc107; color:#fff} .btn-edit:hover{background:#e0a800}
+    .btn-delete{background:#dc3545; color:#fff} .btn-delete:hover{background:#bd2130}
+    .d-inline{display:inline-block}
+
+    /* Alert sukses */
+    .alert-success{background:#d4edda; color:#155724; border:1px solid #c3e6cb; padding:.7rem .9rem; border-radius:.5rem; margin-bottom:1rem}
 </style>
 
-<div class="dashboard-container">
-    <h2>Kelola Pengguna</h2>
-    
-    <div class="create-button-container">
-        <a href="{{ route('admin.users.create') }}" class="create-button">Tambah Pengguna Baru</a>
-    </div>
+<div class="container container-users">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 style="margin:0; color:#43a047;">Kelola Pengguna</h3>
+                <a href="{{ route('admin.users.create') }}" class="btn btn-success">
+                    Tambah Pengguna Baru
+                </a>
+            </div>
+        </div>
 
-    @if(session('success'))
-        <div class="success-message">
-            {{ session('success') }}
+        <div class="card-body">
+            @if(session('success'))
+                <div class="alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if($users->isEmpty())
+                <p class="text-center" style="margin:0.5rem 0;">Belum ada data pengguna.</p>
+            @else
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width:70px">ID</th>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>Peran (Role)</th>
+                                <th class="col-actions">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($users as $u)
+                                <tr>
+                                    <td>{{ $u->id }}</td>
+                                    <td>{{ $u->name }}</td>
+                                    <td>{{ $u->email }}</td>
+                                    <td>{{ ucfirst($u->role) }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.users.edit', $u->id) }}" class="btn-action btn-edit">Edit</a>
+                                        <form action="{{ route('admin.users.destroy', $u->id) }}" method="POST" class="d-inline"
+                                              onsubmit="return confirm('Hapus pengguna ini?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn-action btn-delete">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
-    @endif
-    
-    @if($users->isEmpty())
-        <p style="text-align: center;">Tidak ada data pengguna yang tersedia.</p>
-    @else
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>Peran (Role)</th>
-                        <th class="aksi-header">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($users as $user)
-                    <tr>
-                        <td>{{ $user->id }}</td>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ ucfirst($user->role) }}</td>
-                        <td class="aksi-cell">
-                            <div class="action-buttons-container">
-                                <a href="{{ route('admin.users.edit', $user->id) }}" class="action-button edit-button">Edit</a>
-                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="action-button delete-button" onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?')">Hapus</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
+    </div>
 </div>
 @endsection

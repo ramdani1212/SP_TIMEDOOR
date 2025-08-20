@@ -1,156 +1,149 @@
 <?php
 
-namespace App\Http\Controllers\Teacher;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\Teacher;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class ScheduleController extends Controller
 {
     /**
-     * Menampilkan dashboard guru dengan daftar jadwal.
+     * List jadwal (opsional sesuaikan view kamu).
      */
     public function index()
     {
-        $teacherId = Auth::guard('teacher')->id();
-        $schedules = Schedule::where('teacher_id', $teacherId)
-                             ->with(['teacher', 'students'])
-                             ->get();
+        $schedules = Schedule::with(['teacher', 'students'])
+            ->orderByDesc('schedule_date')
+            ->orderBy('start_time')
+            ->get();
 
-        return view('teacher.dashboard', compact('schedules'));
+        return view('admin.schedules.index', compact('schedules'));
     }
 
     /**
-     * Menampilkan form untuk membuat jadwal baru.
+     * Form create.
      */
     public function create()
     {
-        $students = Student::all();
-        return view('teacher.schedules.create', compact('students'));
+        $teachers = Teacher::orderBy('name')->get();
+        $students = Student::orderBy('nama')->get();
+
+        return view('admin.schedules.create', compact('teachers', 'students'));
     }
 
     /**
-     * Menyimpan jadwal baru ke database.
+     * Store jadwal baru.
+     * - Validasi HH:MM
+     * - Simpan sebagai HH:MM:SS
      */
     public function store(Request $request)
     {
         $request->validate([
-            'schedule_date' => 'required|date',
-            'start_time'    => 'required|date_format:H:i',
-            'end_time'      => 'required|date_format:H:i|after:start_time',
-            'jenis_kelas'   => 'required|string|max:255',
-            'students'      => 'required|array',
-            'students.*'    => 'exists:students,id',
+            'teacher_id'    => ['required', 'exists:teachers,id'],
+            'students'      => ['required', 'array'],
+            'students.*'    => ['exists:students,id'],
+            'schedule_date' => ['required', 'date'],
+            'start_time'    => ['required', 'date_format:H:i'],
+            'end_time'      => ['required', 'date_format:H:i', 'after:start_time'],
+            'jenis_kelas'   => ['required', 'string', 'max:255'],
+            'status'        => ['required', 'in:pending,approved,completed,revision,cancelled'],
+            'revision_note' => ['nullable', 'string'],
         ]);
 
         DB::beginTransaction();
-
         try {
-            $schedule = Auth::guard('teacher')->user()->schedules()->create([
+            $schedule = Schedule::create([
+                'teacher_id'    => $request->teacher_id,
                 'schedule_date' => $request->schedule_date,
-                'start_time'    => $request->start_time,
-                'end_time'      => $request->end_time,
+                'start_time'    => $request->start_time . ':00', // normalize -> H:i:s
+                'end_time'      => $request->end_time   . ':00', // normalize -> H:i:s
                 'jenis_kelas'   => $request->jenis_kelas,
-                'status'        => 'pending',
+                'status'        => $request->status,
+                'revision_note' => $request->revision_note,
             ]);
 
-            $schedule->students()->attach($request->input('students'));
+            $schedule->students()->attach($request->input('students', []));
 
             DB::commit();
-
-            return redirect()->route('teacher.dashboard')->with('success', 'Jadwal berhasil dibuat!');
-
-        } catch (\Exception $e) {
+            return redirect()->route('admin.dashboard')->with('success', 'Jadwal berhasil dibuat!');
+        } catch (Throwable $e) {
             DB::rollBack();
-            return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Terjadi kesalahan saat membuat jadwal. Silakan coba lagi.');
+            return back()->withInput()->with('error', 'Terjadi kesalahan saat membuat jadwal.');
         }
     }
 
     /**
-     * Menampilkan form untuk mengedit jadwal.
+     * Form edit.
      */
     public function edit(Schedule $schedule)
     {
-        if ($schedule->teacher_id !== Auth::guard('teacher')->id()) {
-            abort(403, 'Anda tidak diizinkan untuk mengedit jadwal ini.');
-        }
+        $teachers = Teacher::orderBy('name')->get();
+        $students = Student::orderBy('nama')->get();
 
-        $students = Student::all();
-        return view('teacher.schedules.edit', compact('schedule', 'students'));
+        return view('admin.schedules.edit', compact('schedule', 'teachers', 'students'));
     }
 
     /**
-     * Mengupdate jadwal di database.
+     * Update jadwal.
+     * - Validasi HH:MM
+     * - Simpan sebagai HH:MM:SS
      */
     public function update(Request $request, Schedule $schedule)
     {
-        if ($schedule->teacher_id !== Auth::guard('teacher')->id()) {
-            abort(403, 'Anda tidak diizinkan untuk memperbarui jadwal ini.');
-        }
-
         $request->validate([
-            'schedule_date' => 'required|date',
-            'start_time'    => 'required|date_format:H:i',
-            'end_time'      => 'required|date_format:H:i|after:start_time',
-            'jenis_kelas'   => 'required|string|max:255',
-            'students'      => 'required|array',
-            'students.*'    => 'exists:students,id',
+            'teacher_id'    => ['required', 'exists:teachers,id'],
+            'students'      => ['required', 'array'],
+            'students.*'    => ['exists:students,id'],
+            'schedule_date' => ['required', 'date'],
+            'start_time'    => ['required', 'date_format:H:i'],
+            'end_time'      => ['required', 'date_format:H:i', 'after:start_time'],
+            'jenis_kelas'   => ['required', 'string', 'max:255'],
+            'status'        => ['required', 'in:pending,approved,completed,revision,cancelled'],
+            'revision_note' => ['nullable', 'string'],
         ]);
 
         DB::beginTransaction();
-
         try {
             $schedule->update([
+                'teacher_id'    => $request->teacher_id,
                 'schedule_date' => $request->schedule_date,
-                'start_time'    => $request->start_time,
-                'end_time'      => $request->end_time,
+                'start_time'    => $request->start_time . ':00', // normalize -> H:i:s
+                'end_time'      => $request->end_time   . ':00', // normalize -> H:i:s
                 'jenis_kelas'   => $request->jenis_kelas,
+                'status'        => $request->status,
+                'revision_note' => $request->revision_note,
             ]);
 
-            $schedule->students()->sync($request->input('students'));
+            $schedule->students()->sync($request->input('students', []));
 
             DB::commit();
-
-            return redirect()->route('teacher.dashboard')->with('success', 'Jadwal berhasil diperbarui!');
-
-        } catch (\Exception $e) {
+            return redirect()->route('admin.dashboard')->with('success', 'Jadwal berhasil diperbarui!');
+        } catch (Throwable $e) {
             DB::rollBack();
-            return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Terjadi kesalahan saat memperbarui jadwal. Silakan coba lagi.');
+            return back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui jadwal.');
         }
     }
 
     /**
-     * Menghapus jadwal dari database.
+     * Hapus jadwal.
      */
     public function destroy(Schedule $schedule)
     {
-        if ($schedule->teacher_id !== Auth::guard('teacher')->id()) {
-            abort(403, 'Anda tidak diizinkan untuk menghapus jadwal ini.');
-        }
-        
         DB::beginTransaction();
-
         try {
             $schedule->students()->detach();
             $schedule->delete();
 
             DB::commit();
-            
-            return redirect()->route('teacher.dashboard')->with('success', 'Jadwal berhasil dihapus!');
-            
-        } catch (\Exception $e) {
+            return redirect()->route('admin.dashboard')->with('success', 'Jadwal berhasil dihapus!');
+        } catch (Throwable $e) {
             DB::rollBack();
-            return redirect()->back()
-                             ->with('error', 'Terjadi kesalahan saat menghapus jadwal. Silakan coba lagi.');
+            return back()->with('error', 'Terjadi kesalahan saat menghapus jadwal.');
         }
     }
 }

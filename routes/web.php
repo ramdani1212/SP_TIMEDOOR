@@ -4,11 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Teacher\Auth\LoginController as TeacherLoginController;
 use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\Teacher\ScheduleController as TeacherScheduleController; // ⬅️ tambah ini
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStudentController;
-use App\Http\Controllers\Admin\AdminUserController; // Menggunakan AdminUserController untuk mengelola admin dan guru
-use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\ScheduleController as AdminScheduleController; // ⬅️ alias biar tidak konflik
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -26,68 +27,82 @@ Route::get('/login', function () {
     return redirect()->route('admin.login');
 })->name('login');
 
-// --- Grup Rute untuk Admin ---
+/* =========================
+|        ADMIN ROUTES
+========================= */
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Rute login admin
+    // Auth admin
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminLoginController::class, 'login']);
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
-    
-    Route::middleware('auth:web')->group(function () {
 
-        // Rute untuk dashboard dan notifikasi admin
+    Route::middleware('auth:web')->group(function () {
+        // Dashboard & notifikasi
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/notifications', [AdminDashboardController::class, 'notificationsIndex'])->name('notifications.index');
-        
-        // Rute untuk mengelola siswa dengan resource controller
+
+        // Students (resource)
         Route::resource('students', AdminStudentController::class);
 
-        // Rute untuk mengelola semua pengguna (admin dan guru) dalam satu halaman
+        // Users (kelola admin & guru satu halaman)
         Route::resource('users', AdminUserController::class);
 
-        // Rute untuk mengelola jadwal dengan resource controller
-        Route::resource('schedules', ScheduleController::class);
+        // Schedules (resource) — gunakan alias controller admin
+        Route::resource('schedules', AdminScheduleController::class);
 
-        // Rute untuk persetujuan dan revisi (ini tetap manual karena bukan bagian dari resource)
+        // Persetujuan & revisi jadwal (manual)
         Route::post('/schedules/{schedule}/approve', [AdminDashboardController::class, 'approve'])->name('schedules.approve');
         Route::post('/schedules/{schedule}/revision', [AdminDashboardController::class, 'revision'])->name('schedules.revision');
-        
-        // Rute untuk mengelola profil dan password admin
+
+        // Profil & password admin
         Route::get('/profile', [AdminController::class, 'showProfile'])->name('profile.show');
         Route::get('/change-password', [AdminController::class, 'showChangePasswordForm'])->name('password.edit');
         Route::post('/change-password', [AdminController::class, 'updatePassword'])->name('password.update');
-        
-        // Rute untuk menandai notifikasi sebagai sudah dibaca
+
+        // Notifikasi: tandai sudah dibaca
         Route::patch('/notifications/{notification}/mark-as-read', [AdminController::class, 'markAsRead'])->name('notifications.markAsRead');
     });
 });
 
-// --- Grup Rute untuk Guru ---
+/* =========================
+|        TEACHER ROUTES
+========================= */
 Route::prefix('teacher')->name('teacher.')->group(function () {
-    // Rute login guru
+    // Auth guru
     Route::get('/login', [TeacherLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [TeacherLoginController::class, 'login']);
     Route::post('/logout', [TeacherLoginController::class, 'logout'])->name('logout');
 
     Route::middleware('auth:teacher')->group(function () {
-        // Rute dashboard guru
+        // Dashboard guru
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
-        
-        // Rute untuk halaman profil guru
+
+        // Profil guru
         Route::get('/profile', [TeacherDashboardController::class, 'showProfile'])->name('profile.show');
 
-        // Rute untuk mengelola password guru
+        // Ubah password guru
         Route::get('/change-password', [TeacherDashboardController::class, 'showChangePasswordForm'])->name('password.edit');
         Route::post('/change-password', [TeacherDashboardController::class, 'updatePassword'])->name('password.update');
 
-        // Rute untuk mengelola status jadwal
+        // STATUS jadwal (approve/revision) yang dikirim guru ke admin
         Route::post('/schedules/{schedule}/approve', [TeacherDashboardController::class, 'approve'])->name('schedules.approve');
         Route::post('/schedules/{schedule}/revision', [TeacherDashboardController::class, 'revision'])->name('schedules.revision');
-        
-        // Rute untuk mengirim notifikasi catatan umum ke admin
+
+        // Kirim catatan umum ke admin
         Route::post('/send-note', [TeacherDashboardController::class, 'sendNoteToAdmin'])->name('send-note');
-        
-        // Rute untuk melihat riwayat notifikasi
+
+        // Riwayat notifikasi guru
         Route::get('/notifications', [TeacherDashboardController::class, 'notificationsIndex'])->name('notifications.index');
+
+        // Schedules CRUD untuk guru (ini yang bikin Create/Edit jalan)
+        Route::resource('schedules', TeacherScheduleController::class)->except(['show']);
+        // -> routes yang otomatis dibuat:
+        // GET    /teacher/schedules           -> teacher.schedules.index
+        // GET    /teacher/schedules/create    -> teacher.schedules.create
+        // POST   /teacher/schedules           -> teacher.schedules.store
+        // GET    /teacher/schedules/{schedule}/edit -> teacher.schedules.edit
+        // PUT    /teacher/schedules/{schedule} -> teacher.schedules.update
+        // PATCH  /teacher/schedules/{schedule} -> teacher.schedules.update
+        // DELETE /teacher/schedules/{schedule} -> teacher.schedules.destroy
     });
 });
