@@ -22,9 +22,4 @@ class Teacher extends Authenticatable // PENTING: Extend class ini
         'password',
     ];
 
-    public function schedules()
-    {
-        return $this->hasMany(Schedule::class);
-    }
-
 }

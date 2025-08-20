@@ -31,8 +31,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('students',  AdminStudentController::class);
         Route::resource('users',     AdminUserController::class);
-        Route::resource('schedules', AdminScheduleController::class);
-
+        Route::resource('schedules', \App\Http\Controllers\Admin\ScheduleController::class);
         Route::post('/schedules/{schedule}/approve',  [AdminDashboardController::class, 'approve'])->name('schedules.approve');
         Route::post('/schedules/{schedule}/revision', [AdminDashboardController::class, 'revision'])->name('schedules.revision');
 

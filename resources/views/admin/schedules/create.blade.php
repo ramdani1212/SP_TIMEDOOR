@@ -31,71 +31,86 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.schedules.store') }}" method="POST">
+    {{-- FORM UTAMA --}}
+    <form id="scheduleCreateForm" action="{{ route('admin.schedules.store') }}" method="POST" novalidate>
         @csrf
-
-        <div class="form-group">
-            <label for="teacher_id">Pilih Guru</label>
-            <select name="teacher_id" id="teacher_id" required>
-                <option value="">-- Pilih Guru --</option>
-                @foreach($teachers as $teacher)
-                    <option value="{{ $teacher->id }}" @selected(old('teacher_id') == $teacher->id)>{{ $teacher->name }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="students">Pilih Siswa</label>
-            <select name="students[]" id="students" multiple size="6" required>
-                @foreach($students as $student)
-                    <option value="{{ $student->id }}" @selected(collect(old('students', []))->contains($student->id))>
-                        {{ $student->nama }}
-                    </option>
-                @endforeach
-            </select>
-            <small>Gunakan Ctrl (Windows) / Command (Mac) untuk pilih lebih dari satu.</small>
-        </div>
-
-        <div class="form-group">
-            <label for="schedule_date">Tanggal</label>
-            <input type="date" name="schedule_date" id="schedule_date" value="{{ old('schedule_date') }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="start_time">Waktu Mulai</label>
-            <input type="time" name="start_time" id="start_time"
-                value="{{ old('start_time') }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="end_time">Waktu Selesai</label>
-            <input type="time" name="end_time" id="end_time"
-                value="{{ old('end_time') }}" required>
-        </div>
-
-
-        <div class="form-group">
-            <label for="jenis_kelas">Jenis Kelas</label>
-            <select name="jenis_kelas" id="jenis_kelas" required>
-                <option value="windows" @selected(old('jenis_kelas')=='windows')>Windows</option>
-                <option value="linux"   @selected(old('jenis_kelas')=='linux')>Linux</option>
-                <option value="android" @selected(old('jenis_kelas')=='android')>Android</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="status">Status</label>
-            <select name="status" id="status" required>
-                <option value="pending"   @selected(old('status')=='pending')>Pending</option>
-                <option value="approved"  @selected(old('status')=='approved')>Approved</option>
-                <option value="completed" @selected(old('status')=='completed')>Completed</option>
-                <option value="revision"  @selected(old('status')=='revision')>Revision</option>
-                <option value="cancelled" @selected(old('status')=='cancelled')>Cancelled</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Simpan</button>
-        <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Batal</a>
     </form>
+
+    {{-- Semua field diikat ke form via atribut form="scheduleCreateForm" agar aman dari nested form --}}
+    <div class="form-group">
+        <label for="teacher_id">Pilih Guru</label>
+        <select form="scheduleCreateForm" name="teacher_id" id="teacher_id" required>
+            <option value="">-- Pilih Guru --</option>
+            @foreach($teachers as $teacher)
+                <option value="{{ $teacher->id }}" @selected(old('teacher_id') == $teacher->id)>{{ $teacher->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="students">Pilih Siswa</label>
+        <select form="scheduleCreateForm" name="students[]" id="students" multiple size="6" required>
+            @foreach($students as $student)
+                <option value="{{ $student->id }}" @selected(collect(old('students', []))->contains($student->id))>
+                    {{ $student->nama }}
+                </option>
+            @endforeach
+        </select>
+        <small>Gunakan Ctrl (Windows) / Command (Mac) untuk pilih lebih dari satu.</small>
+    </div>
+
+    <div class="form-group">
+        <label for="schedule_date">Tanggal</label>
+        <input form="scheduleCreateForm" type="date" name="schedule_date" id="schedule_date" value="{{ old('schedule_date') }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="start_time">Waktu Mulai</label>
+        <input form="scheduleCreateForm" type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="end_time">Waktu Selesai</label>
+        <input form="scheduleCreateForm" type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="jenis_kelas">Jenis Kelas</label>
+        <select form="scheduleCreateForm" name="jenis_kelas" id="jenis_kelas" required>
+            <option value="windows" @selected(old('jenis_kelas')=='windows')>Windows</option>
+            <option value="linux"   @selected(old('jenis_kelas')=='linux')>Linux</option>
+            <option value="android" @selected(old('jenis_kelas')=='android')>Android</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select form="scheduleCreateForm" name="status" id="status" required>
+            <option value="pending"   @selected(old('status')=='pending')>Pending</option>
+            <option value="confirmed" @selected(old('status')=='confirmed')>Confirmed</option>
+            <option value="cancelled" @selected(old('status')=='cancelled')>Cancelled</option>
+            <option value="revision"  @selected(old('status')=='revision')>Revision</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="revision_note">Catatan Revisi (opsional)</label>
+        <textarea form="scheduleCreateForm" name="revision_note" id="revision_note" rows="3">{{ old('revision_note') }}</textarea>
+    </div>
+
+    <button form="scheduleCreateForm" type="submit" class="btn btn-primary">Simpan</button>
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Batal</a>
 </div>
+
+{{-- DEBUG optional: log saat submit ter-click --}}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const f = document.getElementById('scheduleCreateForm');
+    if(f){
+        f.addEventListener('submit', function(){
+            console.log('[create] submitting...');
+        });
+    }
+});
+</script>
 @endsection
