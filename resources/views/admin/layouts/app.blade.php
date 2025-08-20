@@ -145,7 +145,7 @@
     <div class="wrapper">
         <div class="sidebar" id="sidebar">
             <img src="{{ asset('images/logo.png') }}" alt="Logo Admin" class="logo-image">
-              <ul>
+            <ul>
                 <li><a href="{{ route('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
                 {{-- Item menu baru untuk Riwayat Notifikasi --}}
                 <li><a href="{{ route('admin.notifications.index') }}"><i class="fas fa-bell"></i>Riwayat Notifikasi</a></li>
@@ -162,7 +162,13 @@
             <button id="sidebarToggle" class="sidebar-toggle">«</button>
             
             <div class="top-header">
+                {{-- Mulai Perubahan --}}
+                @if(Auth::check())
+                <a href="{{ route('admin.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> {{ Auth::user()->name }} | {{ Auth::user()->role }}</a>
+                @else
                 <a href="{{ route('admin.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> Lihat Profile</a>
+                @endif
+                {{-- Akhir Perubahan --}}
                 <a href="{{ route('admin.password.edit') }}" class="password-btn" aria-label="Ubah Password"><i class="fas fa-key"></i></a>
             </div>
             

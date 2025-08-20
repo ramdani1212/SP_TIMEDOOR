@@ -165,7 +165,11 @@
             <button id="sidebarToggle" class="sidebar-toggle">«</button>
             
             <div class="top-header">
+                @if(Auth::check())
+                <a href="{{ route('teacher.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> {{ Auth::user()->name }} | {{ Auth::user()->role }}</a>
+                @else
                 <a href="{{ route('teacher.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> Lihat Profile</a>
+                @endif
                 <a href="{{ route('teacher.password.edit') }}" class="password-btn" aria-label="Ubah Password"><i class="fas fa-key"></i></a>
             </div>
             
