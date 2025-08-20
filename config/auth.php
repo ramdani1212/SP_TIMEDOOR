@@ -8,16 +8,15 @@ return [
     ],
 
     'guards' => [
-        // Admin & user biasa (tabel `users`)
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
 
-        // Guru (tabel `teachers`)
+        // Guard untuk guru, tetap session + provider users
         'teacher' => [
             'driver' => 'session',
-            'provider' => 'teachers',
+            'provider' => 'users',
         ],
 
         'api' => [
@@ -32,21 +31,11 @@ return [
             'driver' => 'eloquent',
             'model'  => App\Models\User::class,
         ],
-        'teachers' => [
-            'driver' => 'eloquent',
-            'model'  => App\Models\Teacher::class,
-        ],
     ],
 
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
-        ],
-        'teachers' => [
-            'provider' => 'teachers',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,

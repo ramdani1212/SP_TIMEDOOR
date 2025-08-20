@@ -64,13 +64,13 @@
         <div class="form-group">
             <label for="start_time">Waktu Mulai</label>
             <input type="time" name="start_time" id="start_time"
-                value="{{ old('start_time') }}" step="1" required>
+                value="{{ old('start_time') }}" required>
         </div>
 
         <div class="form-group">
             <label for="end_time">Waktu Selesai</label>
             <input type="time" name="end_time" id="end_time"
-                value="{{ old('end_time') }}" step="1" required>
+                value="{{ old('end_time') }}" required>
         </div>
 
 
