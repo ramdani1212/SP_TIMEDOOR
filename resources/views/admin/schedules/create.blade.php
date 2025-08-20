@@ -93,11 +93,6 @@
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="revision_note">Catatan Revisi (opsional)</label>
-        <textarea form="scheduleCreateForm" name="revision_note" id="revision_note" rows="3">{{ old('revision_note') }}</textarea>
-    </div>
-
     <button form="scheduleCreateForm" type="submit" class="btn btn-primary">Simpan</button>
     <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Batal</a>
 </div>
