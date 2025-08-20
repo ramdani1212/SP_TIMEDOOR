@@ -17,14 +17,20 @@ class LoginController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        // Menggunakan guard 'web' untuk login admin
         if (Auth::guard('web')->attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('/admin/dashboard');
+            // PERBAIKAN: Periksa apakah role pengguna adalah 'admin'
+            $user = Auth::guard('web')->user();
+            if ($user->role === 'admin') {
+                $request->session()->regenerate();
+                return redirect()->intended('/admin/dashboard');
+            }
+            
+            // Jika role bukan 'admin', logout dan kembalikan dengan pesan error
+            Auth::guard('web')->logout();
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Email atau Password salah, atau Anda tidak memiliki akses sebagai admin.',
         ]);
     }
 

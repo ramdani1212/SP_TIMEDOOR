@@ -2,32 +2,22 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Defaults
-    |--------------------------------------------------------------------------
-    */
-
     'defaults' => [
         'guard' => 'web',
         'passwords' => 'users',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Guards
-    |--------------------------------------------------------------------------
-    */
-
     'guards' => [
+        // Admin & user biasa (tabel `users`)
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
 
+        // Guru (tabel `teachers`)
         'teacher' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'teachers',
         ],
 
         'api' => [
@@ -37,24 +27,16 @@ return [
         ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | User Providers
-    |--------------------------------------------------------------------------
-    */
-
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model'  => App\Models\User::class,
+        ],
+        'teachers' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\Teacher::class,
         ],
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Resetting Passwords
-    |--------------------------------------------------------------------------
-    */
 
     'passwords' => [
         'users' => [
@@ -63,13 +45,13 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        'teachers' => [
+            'provider' => 'teachers',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Password Confirmation Timeout
-    |--------------------------------------------------------------------------
-    */
 
     'password_timeout' => 10800,
 
