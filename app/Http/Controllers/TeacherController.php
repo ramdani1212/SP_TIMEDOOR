@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Teacher;
+use App\Models\User;
+use App\Models\Schedule;
+use App\Notifications\TeacherNoteNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TeacherController extends Controller
 {
@@ -70,6 +74,12 @@ class TeacherController extends Controller
         return redirect()->route('teachers.index')->with('success', 'Teacher updated.');
     }
 
+
+    public function createRevision(Schedule $schedule)
+{
+    // Mengembalikan view dengan data jadwal yang dipilih
+    return view('teacher.schedules.revision', compact('schedule'));
+    }
     /**
      * Remove the specified resource from storage.
      */
@@ -77,5 +87,28 @@ class TeacherController extends Controller
     {
         $teacher->delete();
         return redirect()->route('teachers.index')->with('success', 'Teacher deleted.');
+    }
+
+    /**
+     * Store a revision note and notify the admin.
+     */
+    public function submitRevision(Request $request, Schedule $schedule)
+    {
+        $request->validate([
+            'note' => 'required|string',
+        ]);
+        
+        // Mengambil guru yang sedang login
+        $teacher = Auth::user(); 
+
+        // Mengambil admin pertama
+        $admin = User::where('role', 'admin')->first();
+
+        // Mengirim notifikasi jika admin ditemukan
+        if ($admin) {
+            $admin->notify(new TeacherNoteNotification($request->note, $teacher, $schedule));
+        }
+
+        return redirect()->back()->with('success', 'Catatan revisi berhasil dikirim ke admin.');
     }
 }
