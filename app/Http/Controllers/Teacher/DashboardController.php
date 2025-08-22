@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\User;
+use App\Models\Student;
 use App\Notifications\TeacherNoteNotification;
 use App\Notifications\TeacherGeneralNoteNotification;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $schedules = Auth::guard('teacher')->user()->schedules()->latest()->get();
+        // Memuat (eager load) relasi 'student'
+        $schedules = Auth::guard('teacher')->user()->schedules()->with('student')->latest()->get();
         return view('teacher.dashboard', compact('schedules'));
     }
 

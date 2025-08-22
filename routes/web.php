@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
 use App\Http\Controllers\Teacher\ScheduleController as TeacherScheduleController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\TeacherController; // Pastikan ini benar
+use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -32,7 +32,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('students',   AdminStudentController::class);
         Route::resource('users',      AdminUserController::class);
-        Route::resource('schedules', \App\Http\Controllers\Admin\ScheduleController::class);
+        Route::resource('schedules', AdminScheduleController::class);
         Route::post('/schedules/{schedule}/approve',   [AdminDashboardController::class, 'approve'])->name('schedules.approve');
         Route::post('/schedules/{schedule}/revision', [AdminDashboardController::class, 'revision'])->name('schedules.revision');
 

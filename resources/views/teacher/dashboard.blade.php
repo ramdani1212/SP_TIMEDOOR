@@ -232,6 +232,7 @@ th.aksi-header, td.aksi-cell, th.notification-header, td.notification-cell {
                     <th>Tanggal</th>
                     <th>Waktu</th>
                     <th>Jenis Kelas</th>
+                    <th>Nama Siswa</th>
                     <th>Status</th>
                     <th>Catatan Revisi</th>
                     <th class="aksi-header">Aksi</th>
@@ -244,6 +245,7 @@ th.aksi-header, td.aksi-cell, th.notification-header, td.notification-cell {
                     <td>{{ $schedule->schedule_date }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}</td>
                     <td>{{ $schedule->jenis_kelas }}</td>
+                    <td>{{ $schedule->student->name ?? 'N/A' }}</td>
                     <td>{{ $schedule->status }}</td>
                     <td>{{ $schedule->revision_note ?? '-' }}</td>
                     <td class="aksi-cell">
@@ -263,86 +265,83 @@ th.aksi-header, td.aksi-cell, th.notification-header, td.notification-cell {
                         @endif
                     </td>
                     <td class="notification-cell">
-                        @if($schedule->status == 'approved')
-                            <button class="action-button notify-button open-chat-modal" data-schedule-id="{{ $schedule->id }}" title="Kirim chat ke Admin">
-                                <i class="fas fa-bell"></i>
-                            </button>
-                        @endif
+                        <button class="action-button notify-button open-chat-modal" data-schedule-id="{{ $schedule->id }}" title="Kirim chat ke Admin">
+                            <i class="fas fa-bell"></i>
+                        </button>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     @endif
-</div>
 
-{{-- MODAL REVISI --}}
-@foreach($schedules as $schedule)
-<input type="checkbox" id="modal-toggle-{{ $schedule->id }}" class="modal-toggle">
-<div class="modal">
-    <div class="modal-content">
-        <label for="modal-toggle-{{ $schedule->id }}" class="close-button">&times;</label>
-        <h2>Tambahkan Catatan Revisi</h2>
-        <form method="POST" action="{{ route('teacher.schedules.revision', $schedule->id) }}">
-            @csrf
-            <textarea name="revision_note" placeholder="Tulis catatan revisi di sini..." required>{{ $schedule->revision_note ?? '' }}</textarea>
-            <button type="submit" class="submit-revision-button">Kirim Revisi</button>
-        </form>
+    {{-- MODAL REVISI --}}
+    @foreach($schedules as $schedule)
+    <input type="checkbox" id="modal-toggle-{{ $schedule->id }}" class="modal-toggle">
+    <div class="modal">
+        <div class="modal-content">
+            <label for="modal-toggle-{{ $schedule->id }}" class="close-button">&times;</label>
+            <h2>Tambahkan Catatan Revisi</h2>
+            <form method="POST" action="{{ route('teacher.schedules.revision', $schedule->id) }}">
+                @csrf
+                <textarea name="revision_note" placeholder="Tulis catatan revisi di sini..." required>{{ $schedule->revision_note ?? '' }}</textarea>
+                <button type="submit" class="submit-revision-button">Kirim Revisi</button>
+            </form>
+        </div>
     </div>
-</div>
-@endforeach
+    @endforeach
 
-{{-- MODAL CHAT BARU UNTUK NOTIFIKASI --}}
-<div id="chatModal" class="modal-chat">
-    <div class="modal-chat-content">
-        <span class="close-button" onclick="closeChatModal()">&times;</span>
-        <h2>Kirim Pesan ke Admin</h2>
-        <p>Jadwal yang dipilih: <strong id="chat-schedule-id"></strong></p>
-        <form id="chatForm" method="POST" action="{{ route('teacher.send-note') }}">
-            @csrf
-            <input type="hidden" name="schedule_id" id="chat-schedule-input">
-            <textarea name="note_to_admin" placeholder="Tulis pesan Anda di sini..." required></textarea>
-            <button type="submit" class="submit-chat-button">Kirim Pesan</button>
-        </form>
+    {{-- MODAL CHAT BARU UNTUK NOTIFIKASI --}}
+    <div id="chatModal" class="modal-chat">
+        <div class="modal-chat-content">
+            <span class="close-button" onclick="closeChatModal()">&times;</span>
+            <h2>Kirim Pesan ke Admin</h2>
+            <p>Jadwal yang dipilih: <strong id="chat-schedule-id"></strong></p>
+            <form id="chatForm" method="POST" action="{{ route('teacher.send-note') }}">
+                @csrf
+                <input type="hidden" name="schedule_id" id="chat-schedule-input">
+                <textarea name="note_to_admin" placeholder="Tulis pesan Anda di sini..." required></textarea>
+                <button type="submit" class="submit-chat-button">Kirim Pesan</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const currentPath = window.location.href;
-        const navLinks = document.querySelectorAll('.sidebar ul li a');
-        navLinks.forEach(link => {
-            if (link.href === currentPath) {
-                link.classList.add('active');
-            }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.href;
+            const navLinks = document.querySelectorAll('.sidebar ul li a');
+            navLinks.forEach(link => {
+                if (link.href === currentPath) {
+                    link.classList.add('active');
+                }
+            });
         });
-    });
 
-    const chatModal = document.getElementById('chatModal');
-    const chatScheduleId = document.getElementById('chat-schedule-id');
-    const chatScheduleInput = document.getElementById('chat-schedule-input');
-    
-    function openChatModal(scheduleId) {
-        chatScheduleId.textContent = scheduleId;
-        chatScheduleInput.value = scheduleId;
-        chatModal.style.display = 'block';
-    }
-
-    function closeChatModal() {
-        chatModal.style.display = 'none';
-    }
-
-    document.querySelectorAll('.open-chat-modal').forEach(button => {
-        button.addEventListener('click', function() {
-            const scheduleId = this.getAttribute('data-schedule-id');
-            openChatModal(scheduleId);
-        });
-    });
-
-    window.onclick = function(event) {
-        if (event.target == chatModal) {
-            closeChatModal();
+        const chatModal = document.getElementById('chatModal');
+        const chatScheduleId = document.getElementById('chat-schedule-id');
+        const chatScheduleInput = document.getElementById('chat-schedule-input');
+        
+        function openChatModal(scheduleId) {
+            chatScheduleId.textContent = scheduleId;
+            chatScheduleInput.value = scheduleId;
+            chatModal.style.display = 'block';
         }
-    }
-</script>
+
+        function closeChatModal() {
+            chatModal.style.display = 'none';
+        }
+
+        document.querySelectorAll('.open-chat-modal').forEach(button => {
+            button.addEventListener('click', function() {
+                const scheduleId = this.getAttribute('data-schedule-id');
+                openChatModal(scheduleId);
+            });
+        });
+
+        window.onclick = function(event) {
+            if (event.target == chatModal) {
+                closeChatModal();
+            }
+        }
+    </script>
 @endsection
