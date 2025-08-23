@@ -55,4 +55,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Schedule::class, 'teacher_id');
     }
+
+    public function scopeRole($q, $role)
+    {
+        return $q->where('role', $role);
+    }
 }

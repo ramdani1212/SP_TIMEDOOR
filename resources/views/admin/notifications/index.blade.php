@@ -1,154 +1,110 @@
 @extends('admin.layouts.app')
-
-@section('title', 'Riwayat Notifikasi Admin')
+@section('title','Notifikasi')
 
 @section('content')
-<style>
-    /* Mengatur kontainer utama */
-    .container {
-        padding-top: 30px;
-        padding-bottom: 30px;
-    }
+<div class="container py-3">
+  {{-- Flash message --}}
+  @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
+  @if(session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+  @endif
 
-    /* Mengatur kartu utama */
-    .card {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
+  <h2 class="mb-3" style="color:#4CAF50;">Notifikasi (Admin)</h2>
 
-    .card-header {
-        background-color: #4CAF50; /* Warna hijau, konsisten dengan dashboard */
-        color: white;
-        font-weight: bold;
-        font-size: 1.25rem;
-        /* Diperbaiki: Mengurangi padding vertikal untuk membuat header lebih pendek */
-        padding: 0.75rem 1.25rem; 
-        border-bottom: none;
-    }
+  {{-- UNREAD --}}
+  <h5 class="mt-2">Belum Dibaca</h5>
+  @forelse($unread as $n)
+    @php
+      $data = is_array($n->data) ? $n->data : [];
+      $title = $data['title'] ?? 'Notifikasi';
+      $message = $data['message'] ?? '';
+      $url = $data['url'] ?? null;
+    @endphp
 
-    /* Mengatur daftar notifikasi */
-    .table-responsive {
-        overflow-x: auto;
-    }
-    
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .table thead th {
-        background-color: #4CAF50;
-        color: white;
-        padding: 12px 15px;
-        text-align: left;
-    }
-    
-    .table tbody tr:nth-child(odd) {
-        background-color: #f9f9f9;
-    }
-    
-    .table tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-    
-    .table tbody td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #ddd;
-        vertical-align: top;
-    }
-
-    /* Mengatur pesan notifikasi */
-    .alert {
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 0;
-        font-size: 1rem;
-    }
-
-    .alert-warning {
-        background-color: #fff3e0;
-        border-color: #ffe0b2;
-        color: #ff9800;
-    }
-
-    .alert-info {
-        background-color: #e3f2fd;
-        border-color: #bbdefb;
-        color: #2196F3;
-    }
-
-    /* Mengatur teks jika tidak ada notifikasi */
-    .text-center {
-        color: #777;
-        padding: 40px 0;
-    }
-
-    /* Styling pagination */
-    .pagination .page-item .page-link {
-        color: #4CAF50;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #4CAF50;
-        border-color: #4CAF50;
-    }
-</style>
-
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            Riwayat Notifikasi
+    <div class="border rounded p-3 mb-2 d-flex justify-content-between align-items-start" style="background:#fff;">
+      <div>
+        <div class="fw-bold">
+          <i class="fas fa-bell"></i> {{ $title }}
         </div>
-        <div class="card-body">
-            @if($notifications->isEmpty())
-                <p class="text-center">Tidak ada notifikasi yang tersedia.</p>
-            @else
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Pengirim</th>
-                                <th>Pesan</th>
-                                <th>Waktu</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($notifications as $notification)
-                                <tr>
-                                    <td>{{ $notification->data['teacher']['name'] ?? 'Admin' }}</td>
-                                    <td>
-                                        @if(isset($notification->data['schedule']))
-                                            <div class="alert alert-warning" role="alert">
-                                                <strong>Notifikasi Revisi:</strong> Jadwal Kelas <strong>{{ $notification->data['schedule']['jenis_kelas'] }}</strong> membutuhkan revisi.
-                                                <br>
-                                                <strong>Catatan:</strong> {{ $notification->data['revision_note'] ?? 'Tidak ada catatan.' }}
-                                            </div>
-                                        @elseif(isset($notification->data['note_to_admin']))
-                                            <div class="alert alert-info" role="alert">
-                                                <strong>Catatan Umum:</strong>
-                                                <br>
-                                                <strong>Pesan:</strong> {{ $notification->data['note_to_admin'] }}
-                                            </div>
-                                        @else
-                                            <div class="alert alert-info" role="alert">
-                                                Notifikasi baru.
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-3">
-                    {{ $notifications->links() }}
-                </div>
+        @if($message !== '')
+          <div class="mt-1">{{ $message }}</div>
+        @endif
+
+        {{-- extra info opsional (misal data jadwal) --}}
+        @if(!empty($data['schedule']) && is_array($data['schedule']))
+          <div class="mt-2" style="font-size:0.92rem; color:#555;">
+            @php $sch = $data['schedule']; @endphp
+            @if(!empty($sch['date']))<div><strong>Tanggal:</strong> {{ $sch['date'] }}</div>@endif
+            @if(!empty($sch['start_time']) || !empty($sch['end_time']))
+              <div><strong>Waktu:</strong> {{ $sch['start_time'] ?? '-' }} - {{ $sch['end_time'] ?? '-' }}</div>
             @endif
-        </div>
+            @if(!empty($sch['jenis']))<div><strong>Jenis:</strong> {{ $sch['jenis'] }}</div>@endif
+            @if(!empty($sch['status']))<div><strong>Status:</strong> {{ ucfirst($sch['status']) }}</div>@endif
+          </div>
+        @endif
+
+        @if(!empty($url))
+          <div class="mt-2"><a href="{{ $url }}" class="text-primary">Buka</a></div>
+        @endif
+
+        <div class="text-muted small mt-1">{{ $n->created_at->diffForHumans() }}</div>
+      </div>
+
+      <form action="{{ route('admin.notifications.markAsRead',$n->id) }}" method="POST">
+        @csrf @method('PATCH')
+        <button class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-check"></i> Tandai dibaca
+        </button>
+      </form>
     </div>
+  @empty
+    <div class="alert alert-secondary">Tidak ada notifikasi baru.</div>
+  @endforelse
+
+  {{-- ALL --}}
+  <h5 class="mt-4">Semua Notifikasi</h5>
+  @forelse($all as $n)
+    @php
+      $data = is_array($n->data) ? $n->data : [];
+      $title = $data['title'] ?? 'Notifikasi';
+      $message = $data['message'] ?? '';
+      $url = $data['url'] ?? null;
+    @endphp
+
+    <div class="border rounded p-3 mb-2" style="background:#fff;">
+      <div class="fw-bold">
+        <i class="far fa-bell"></i> {{ $title }}
+      </div>
+      @if($message !== '')
+        <div class="mt-1">{{ $message }}</div>
+      @endif
+
+      @if(!empty($data['schedule']) && is_array($data['schedule']))
+        <div class="mt-2" style="font-size:0.92rem; color:#555;">
+          @php $sch = $data['schedule']; @endphp
+          @if(!empty($sch['date']))<div><strong>Tanggal:</strong> {{ $sch['date'] }}</div>@endif
+          @if(!empty($sch['start_time']) || !empty($sch['end_time']))
+            <div><strong>Waktu:</strong> {{ $sch['start_time'] ?? '-' }} - {{ $sch['end_time'] ?? '-' }}</div>
+          @endif
+          @if(!empty($sch['jenis']))<div><strong>Jenis:</strong> {{ $sch['jenis'] }}</div>@endif
+          @if(!empty($sch['status']))<div><strong>Status:</strong> {{ ucfirst($sch['status']) }}</div>@endif
+        </div>
+      @endif
+
+      @if(!empty($url))
+        <div class="mt-2"><a href="{{ $url }}" class="text-primary">Buka</a></div>
+      @endif
+
+      <div class="text-muted small mt-1">{{ $n->created_at->format('d M Y H:i') }}</div>
+    </div>
+  @empty
+    <div class="alert alert-secondary">Belum ada riwayat notifikasi.</div>
+  @endforelse
+
+  <div class="mt-3">
+    {{ $all->links() }}
+  </div>
 </div>
 @endsection

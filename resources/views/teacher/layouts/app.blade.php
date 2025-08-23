@@ -26,88 +26,37 @@
         transition: width 0.3s ease, padding 0.3s ease;
         overflow: hidden;
     }
-    .sidebar.closed {
-        width: 0;
-        padding: 0;
-    }
-    .logo-image {
-        display: block; 
-        width: 150px;
-        margin: 0 auto 30px auto; 
-    }
-    .sidebar h2 {
-        text-align: center;
-        margin-bottom: 30px;
-        color: white;
-        font-weight: bold;
-    }
-    .sidebar.closed h2, .sidebar.closed ul, .sidebar.closed .logout-form {
-        display: none;
-    }
+    .sidebar.closed { width: 0; padding: 0; }
+    .logo-image { display: block; width: 150px; margin: 0 auto 30px auto; }
+    .sidebar h2 { text-align: center; margin-bottom: 30px; color: white; font-weight: bold; }
+    .sidebar.closed h2, .sidebar.closed ul, .sidebar.closed .logout-form { display: none; }
     .sidebar ul { list-style: none; padding: 0; }
     .sidebar ul li { margin-bottom: 15px; }
     .sidebar ul li a { 
-        color: white;
-        text-decoration: none; 
-        display: block; 
-        padding: 10px; 
-        border-radius: 5px; 
-        white-space: nowrap;
-        transition: background-color 0.3s, color 0.3s; 
+        color: white; text-decoration: none; display: block; padding: 10px; 
+        border-radius: 5px; white-space: nowrap; transition: background-color 0.3s, color 0.3s; 
     }
-    .sidebar ul li a i {
-        margin-right: 10px;
-    }
-    .sidebar ul li a:hover,
-    .sidebar ul li a.active {
-        background-color: white;
-        color: #4CAF50;
-    }
-    .content { 
-        flex-grow: 1; 
-        padding: 40px;
-        margin-left: 250px;
-        transition: margin-left 0.3s ease;
-        position: relative;
-    }
-    .content.full-width {
-        margin-left: 0;
-    }
+    .sidebar ul li a i { margin-right: 10px; }
+    .sidebar ul li a:hover, .sidebar ul li a.active { background-color: white; color: #4CAF50; }
+    .content { flex-grow: 1; padding: 40px; margin-left: 250px; transition: margin-left 0.3s ease; position: relative; }
+    .content.full-width { margin-left: 0; }
+
     .top-header {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        padding-bottom: 20px;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #ddd;
+        display: flex; justify-content: flex-end; align-items: center;
+        padding-bottom: 20px; border-bottom: 1px solid #ddd; margin-bottom: 20px;
     }
     .top-header a {
-        text-decoration: none;
-        color: white;
-        background-color: #2196F3;
-        padding: 8px 15px;
-        border-radius: 5px;
-        margin-left: 10px;
-        transition: background-color 0.3s ease;
+        text-decoration: none; color: white; background-color: #2196F3;
+        padding: 8px 15px; border-radius: 5px; margin-left: 10px; transition: background-color 0.3s ease;
     }
-    .top-header a:hover {
-        background-color: #1976D2;
-    }
-    .top-header .password-btn {
-        background-color: #FF9800;
-    }
-    .top-header .password-btn:hover {
-        background-color: #FB8C00;
-    }
+    .top-header a:hover { background-color: #1976D2; }
+    .top-header .password-btn { background-color: #FF9800; }
+    .top-header .password-btn:hover { background-color: #FB8C00; }
+
     .logout-button { background-color: #f44336; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; display: block; width: 100%; margin-top: 20px; }
     .dashboard-container { 
-        max-width: 900px; 
-        margin: 40px auto; 
-        padding: 20px; 
-        background-color: white; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        border-top: 1px solid #ddd;
+        max-width: 900px; margin: 40px auto; padding: 20px; background-color: white; 
+        border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border-top: 1px solid #ddd;
     }
     h1, h2 { color: #4CAF50; text-align: center; }
     p { text-align: center; color: #666; }
@@ -128,23 +77,16 @@
     .error-message { color: #d9534f; font-size: 0.9em; margin-top: 5px; }
 
     .sidebar-toggle {
-        position: fixed;
-        top: 15px;
-        left: 340px;
-        z-index: 1000;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1.2rem;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        transition: left 0.3s ease;
+        position: fixed; top: 15px; left: 340px; z-index: 1000;
+        background-color: #4CAF50; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 1.2rem;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1); transition: left 0.3s ease;
     }
-    .sidebar.closed + .content .sidebar-toggle {
-        left: 10px;
-    }
+    .sidebar.closed + .content .sidebar-toggle { left: 10px; }
+
+    /* Tambahan untuk ikon lonceng & badge */
+    .bell-btn { position: relative; background: transparent !important; color: #333 !important; padding: 0 !important; }
+    .bell-btn:hover { color: #000 !important; background: transparent !important; }
+    .badge-notif { position: absolute; top: -6px; right: -10px; background: #e53935; color: #fff; border-radius: 999px; padding: 2px 6px; font-size: 11px; line-height: 1; }
     </style>
 </head>
 <body>
@@ -160,15 +102,33 @@
                 <button type="submit" class="logout-button">Logout</button>
             </form>
         </div>
+
         <div class="content" id="content">
             <button id="sidebarToggle" class="sidebar-toggle">«</button>
             
             <div class="top-header">
-                @if(Auth::check())
-                <a href="{{ route('teacher.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> {{ Auth::user()->name }} | {{ Auth::user()->role }}</a>
+                {{-- Lonceng Notifikasi (pakai guard teacher) --}}
+                @php
+                  $tUser = Auth::guard('teacher')->user();
+                  $tUnread = $tUser ? $tUser->unreadNotifications()->count() : 0;
+                @endphp
+                <a href="{{ route('teacher.notifications.index') }}" class="bell-btn" title="Notifikasi">
+                  <i class="fas fa-bell fa-lg"></i>
+                  @if($tUnread > 0)
+                    <span class="badge-notif">{{ $tUnread }}</span>
+                  @endif
+                </a>
+
+                {{-- Profil (pakai guard teacher) --}}
+                @if(Auth::guard('teacher')->check())
+                  <a href="{{ route('teacher.profile.show') }}" class="profile-btn">
+                    <i class="fas fa-user-circle"></i> {{ $tUser->name }} | {{ $tUser->role }}
+                  </a>
                 @else
-                <a href="{{ route('teacher.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> Lihat Profile</a>
+                  <a href="{{ route('teacher.profile.show') }}" class="profile-btn"><i class="fas fa-user-circle"></i> Lihat Profile</a>
                 @endif
+
+                {{-- Ubah Password --}}
                 <a href="{{ route('teacher.password.edit') }}" class="password-btn" aria-label="Ubah Password"><i class="fas fa-key"></i></a>
             </div>
             
@@ -182,12 +142,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const currentPath = window.location.href;
             const navLinks = document.querySelectorAll('.sidebar ul li a');
-
-            navLinks.forEach(link => {
-                if (link.href === currentPath) {
-                    link.classList.add('active');
-                }
-            });
+            navLinks.forEach(link => { if (link.href === currentPath) link.classList.add('active'); });
 
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
@@ -196,11 +151,7 @@
             toggleButton.addEventListener('click', function() {
                 sidebar.classList.toggle('closed');
                 content.classList.toggle('full-width');
-                if (sidebar.classList.contains('closed')) {
-                    toggleButton.innerHTML = '»';
-                } else {
-                    toggleButton.innerHTML = '«';
-                }
+                toggleButton.innerHTML = sidebar.classList.contains('closed') ? '»' : '«';
             });
         });
     </script>

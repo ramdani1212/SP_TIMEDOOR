@@ -8,7 +8,12 @@ use App\Models\Schedule;
 use App\Models\User;     // guru diambil dari users (role = teacher)
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
+
+// === tambahkan use untuk Notifications ===
+use App\Notifications\ScheduleCreatedNotification;
+use App\Notifications\ScheduleRevisionNotification;
 
 class ScheduleController extends Controller
 {
@@ -67,8 +72,14 @@ class ScheduleController extends Controller
 
             $schedule->students()->attach($request->input('students', []));
 
+            // === KIRIM NOTIFIKASI: Admin menambah jadwal -> ke teacher yang dipilih ===
+            $teacher = User::find($request->teacher_id);
+            if ($teacher) {
+                Notification::send($teacher, new ScheduleCreatedNotification($schedule));
+            }
+
             DB::commit();
-            return redirect()->route('admin.dashboard')->with('success', 'Jadwal berhasil dibuat!');
+            return redirect()->route('admin.dashboard')->with('success', 'Jadwal berhasil dibuat & notifikasi dikirim ke teacher!');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Terjadi kesalahan saat membuat jadwal.');
@@ -123,6 +134,14 @@ class ScheduleController extends Controller
             ]);
 
             $schedule->students()->sync($request->input('students', []));
+
+            // === KIRIM NOTIFIKASI: kalau status jadi 'revision' kirim catatan revisi ke teacher ===
+            if ($request->status === 'revision' && filled($request->revision_note)) {
+                $teacher = User::find($request->teacher_id);
+                if ($teacher) {
+                    Notification::send($teacher, new ScheduleRevisionNotification($schedule));
+                }
+            }
 
             DB::commit();
             return redirect()->route('admin.dashboard')->with('success', 'Jadwal berhasil diperbarui!');

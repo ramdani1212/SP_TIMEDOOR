@@ -4,9 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use App\Models\Schedule;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Student;
+
+// (Opsional) notifikasi saat revisi
+use App\Notifications\ScheduleRevisionNotification;
 
 class DashboardController extends Controller
 {
@@ -15,24 +20,24 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // PERBAIKAN: Memuat relasi 'teacher' dan 'students' (jamak)
+        // muat relasi teacher & students
         $schedules = Schedule::with(['teacher', 'students'])->latest()->get();
-
         return view('admin.dashboard', compact('schedules'));
     }
 
     /**
-     * Menampilkan riwayat notifikasi untuk admin.
+     * Halaman riwayat notifikasi untuk admin.
+     * - Mengirim $unread (koleksi) untuk bagian "Belum Dibaca"
+     * - Mengirim $all (paginator) untuk bagian "Semua"
+     * Catatan: tidak auto mark-as-read di sini (pakai tombol PATCH markAsRead).
      */
     public function notificationsIndex()
     {
-        $admin = Auth::user();
-        $notifications = $admin->notifications()->latest()->paginate(10);
-
-        // Tandai semua notifikasi yang belum dibaca jadi sudah dibaca
-        $admin->unreadNotifications->markAsRead();
-
-        return view('admin.notifications.index', compact('notifications'));
+        $admin = Auth::user(); // guard web
+        return view('admin.notifications.index', [
+            'unread' => $admin->unreadNotifications,                   // koleksi
+            'all'    => $admin->notifications()->latest()->paginate(10), // paginator
+        ]);
     }
 
     /**
@@ -40,37 +45,35 @@ class DashboardController extends Controller
      */
     public function create()
     {
-        // Pastikan Anda menggunakan kode ini:
-        $teachers = \App\Models\User::where('role', 'teacher')->get();
-        $students = \App\Models\Student::all();
+        $teachers = User::where('role', 'teacher')->orderBy('name')->get();
+        $students = Student::orderBy('nama')->get();
 
         return view('admin.schedules.create', compact('teachers', 'students'));
     }
 
     /**
      * Menyimpan jadwal baru dan siswa yang dipilih.
+     * (Catatan: notifikasi ke teacher saat create sudah kamu pasang di Admin\ScheduleController@store)
      */
     public function store(Request $request)
     {
         $request->validate([
-            // Validasi teacher_id harus ada di tabel 'users'
-            'teacher_id'     => 'required|exists:users,id',
-            'schedule_date'  => 'required|date',
-            'start_time'     => 'required|date_format:H:i',
-            'end_time'       => 'required|date_format:H:i|after:start_time',
-            'jenis_kelas'    => 'required|string|max:255',
-            'students'       => 'required|array',
-            'students.*'     => 'exists:students,id',
+            'teacher_id'    => 'required|exists:users,id',
+            'schedule_date' => 'required|date',
+            'start_time'    => 'required|date_format:H:i',
+            'end_time'      => 'required|date_format:H:i|after:start_time',
+            'jenis_kelas'   => 'required|string|max:255',
+            'students'      => 'required|array',
+            'students.*'    => 'exists:students,id',
         ]);
 
-        // Simpan jadwal
         $schedule = Schedule::create([
             'teacher_id'    => $request->teacher_id,
             'schedule_date' => $request->schedule_date,
             'start_time'    => $request->start_time,
             'end_time'      => $request->end_time,
             'jenis_kelas'   => $request->jenis_kelas,
-            'status'        => 'pending', // default pending
+            'status'        => 'pending',
         ]);
 
         $schedule->students()->attach($request->students);
@@ -79,28 +82,35 @@ class DashboardController extends Controller
     }
 
     /**
-     * Mengubah status jadwal menjadi 'approved'.
+     * Quick action: set status 'approved'.
+     * (Opsional: kalau mau kirim notif approve ke teacher, bisa tambahkan Notification::send di sini)
      */
     public function approve(Schedule $schedule)
     {
         $schedule->update(['status' => 'approved']);
-
         return back()->with('success', 'Jadwal berhasil disetujui!');
     }
 
     /**
-     * Mengubah status jadwal menjadi 'revision'.
+     * Quick action: set status 'revision' + simpan catatan.
+     * Kirim notifikasi revisi ke teacher pemilik jadwal (opsional tapi disarankan).
      */
     public function revision(Schedule $schedule, Request $request)
     {
         $request->validate([
-            'revision_note' => 'nullable|string|max:255',
+            'revision_note' => 'nullable|string|max:5000',
         ]);
 
         $schedule->update([
             'status'        => 'revision',
             'revision_note' => $request->revision_note,
         ]);
+
+        // KIRIM NOTIF revisi ke teacher (kalau classnya tersedia)
+        $teacher = User::find($schedule->teacher_id);
+        if ($teacher && class_exists(ScheduleRevisionNotification::class)) {
+            Notification::send($teacher, new ScheduleRevisionNotification($schedule));
+        }
 
         return back()->with('success', 'Jadwal berhasil ditandai untuk revisi.');
     }

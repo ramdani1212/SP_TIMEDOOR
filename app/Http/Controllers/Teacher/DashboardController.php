@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Notification;
 use App\Models\Schedule;
 use App\Models\User;
 use App\Notifications\TeacherNoteNotification;
 use App\Notifications\TeacherGeneralNoteNotification;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
 {
@@ -96,9 +97,12 @@ class DashboardController extends Controller
             'revision_note' => 'required|string|max:500',
         ]);
 
-        $schedule->update(['status' => 'revision', 'revision_note' => $request->revision_note]);
+        $schedule->update([
+            'status'        => 'revision',
+            'revision_note' => $request->revision_note,
+        ]);
 
-        $admin = User::where('role', 'admin')->first(); 
+        $admin = User::where('role', 'admin')->first();
         if ($admin) {
             $teacher = Auth::guard('teacher')->user();
             $admin->notify(new TeacherNoteNotification($request->revision_note, $teacher, $schedule));
@@ -119,7 +123,7 @@ class DashboardController extends Controller
         $admin = User::where('role', 'admin')->first();
 
         if ($admin) {
-            $teacher = Auth::guard('teacher')->user(); 
+            $teacher = Auth::guard('teacher')->user();
             if ($request->filled('schedule_id')) {
                 $schedule = Schedule::with('students')->find($request->schedule_id);
                 if ($schedule) {
@@ -135,13 +139,31 @@ class DashboardController extends Controller
 
     /**
      * Menampilkan riwayat notifikasi untuk guru.
+     * - $unread untuk bagian "Belum Dibaca"
+     * - $all untuk semua notifikasi (pagination)
      */
     public function notificationsIndex()
     {
         $teacher = Auth::guard('teacher')->user();
-        $notifications = $teacher->notifications()->latest()->paginate(10);
-        $teacher->unreadNotifications->markAsRead();
 
-        return view('teacher.notifications.index', compact('notifications'));
+        return view('teacher.notifications.index', [
+            'unread' => $teacher->unreadNotifications,
+            'all'    => $teacher->notifications()->latest()->paginate(10),
+        ]);
+    }
+
+    /**
+     * Tandai notifikasi sebagai sudah dibaca.
+     */
+    public function markAsRead($id)
+    {
+        $teacher = Auth::guard('teacher')->user();
+        $notification = $teacher->notifications()->findOrFail($id);
+
+        if ($notification) {
+            $notification->markAsRead();
+        }
+
+        return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
     }
 }
