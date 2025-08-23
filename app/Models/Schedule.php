@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Student;
 
 class Schedule extends Model
 {
@@ -12,7 +11,7 @@ class Schedule extends Model
 
     protected $fillable = [
         'teacher_id',
-        'student_id',
+        // HAPUS 'student_id' kalau memang pakai tabel pivot
         'schedule_date',
         'start_time',
         'end_time',
@@ -21,19 +20,22 @@ class Schedule extends Model
         'revision_note',
     ];
 
-    /**
-     * Get the teacher that owns the schedule.
-     */
+    // Jika teacher disimpan di tabel users (role=teacher):
     public function teacher()
     {
-        return $this->belongsTo(Teacher::class);
+        return $this->belongsTo(\App\Models\User::class, 'teacher_id');
     }
+    // Jika teacher disimpan di tabel teachers, ganti baris di atas dengan:
+    // return $this->belongsTo(\App\Models\Teacher::class, 'teacher_id');
 
-    /**
-     * Get the student that owns the schedule.
-     */
-    public function student() // Perhatikan, nama metode ini 'student' (tunggal)
+    // Banyak siswa per jadwal (pivot: schedule_student)
+    public function students()
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsToMany(
+            \App\Models\Student::class,   // model terkait
+            'schedule_student',           // nama tabel pivot
+            'schedule_id',                // FK jadwal di pivot
+            'student_id'                  // FK siswa di pivot
+        )->withTimestamps();
     }
 }
