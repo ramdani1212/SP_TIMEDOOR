@@ -6,172 +6,229 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
-/* --- Layout dasar --- */
-.dashboard-container{padding:20px;background:#fff;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.06)}
-h1,h2{color:#66BB6A;text-align:center}
-h2{margin-top:16px}
-.success-message{background:#d4edda;color:#155724;border:1px solid #c3e6cb;padding:10px;margin-bottom:16px;border-radius:6px;text-align:center}
+/* ===== Page/Card (selaras dgn admin) ===== */
+.page-wrap{max-width:1100px;margin:24px auto}
+.card{background:#fff;border-radius:0;box-shadow:0 10px 28px rgba(0,0,0,.08);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#f6f7f8;border-bottom:1px solid #e9ecef}
+.card-header h2{margin:0;color:#4CAF50;font-size:22px;font-weight:600}
+.card-body{padding:18px}
 
-/* --- Tabel hijau konsisten --- */
-.table-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.06);margin-top:16px}
-table{width:100%;border-collapse:separate;border-spacing:0}
-thead th{background:#43a047;color:#fff;font-weight:700;border-right:1px solid #3c8f42;padding:12px}
-thead th:last-child{border-right:0}
-tbody td{padding:12px;border-bottom:1px solid #e6efe8}
-tbody tr:nth-child(odd){background:#fff}
-tbody tr:nth-child(even){background:#f0f0f0}
-tbody tr:hover{background:#e8f5e9}
-th.aksi-header,td.aksi-cell,th.notification-header,td.notification-cell{text-align:center}
+/* ===== Alerts ===== */
+.alert-success{background:#e9f9ef;border:1px solid #c8efd6;color:#1e7a3b;border-radius:8px;padding:10px 12px;margin-bottom:16px}
 
-/* --- Tombol aksi kecil, flat --- */
-.action-buttons-container{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:nowrap}
-.action-button{display:inline-flex;justify-content:center;align-items:center;padding:0;border:none;border-radius:6px;color:#fff;cursor:pointer;text-align:center;width:90px;height:30px;font-size:14px;line-height:1;text-decoration:none}
-.approve-button{background:#4CAF50}.approve-button:hover{background:#45a049}
-.revise-button{background:#dc3545}.revise-button:hover{background:#c82333}
-.notify-button{background:#007bff;width:36px;height:36px}.notify-button:hover{background:#0056b3}
-.approved-text{text-align:center;font-style:italic;color:#5cb85c}
+/* ===== Table ===== */
+.table-responsive{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;table-layout:auto}
+th,td{padding:12px 14px;border:1px solid #ddd;text-align:left;vertical-align:middle}
+thead th{background:#4CAF50;color:#fff;font-weight:700}
+tbody tr:nth-child(even){background:#f7f7f7}
+tbody tr:hover{background:#f1f8f4}
 
-/* --- Modal (revisi & chat) --- */
-.modal-toggle{display:none}
-.modal,.modal-chat{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,.4);padding-top:60px}
-.modal-toggle:checked ~ .modal{display:block}
-.modal-content,.modal-chat-content{background:#fff;margin:5% auto;padding:20px;border:1px solid #888;width:90%;max-width:520px;border-radius:10px;position:relative}
-.close-button{color:#aaa;float:right;font-size:28px;font-weight:700;cursor:pointer}.close-button:hover{color:#000}
-.modal-content textarea,.modal-chat-content textarea{width:100%;height:120px;margin-bottom:12px;box-sizing:border-box;padding:14px;border:2px solid #66BB6A;border-radius:8px;resize:vertical;font-size:16px;background:#f9f9f9}
-.submit-revision-button,.submit-chat-button{background:#4CAF50;color:#fff;padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:16px;width:100%}
+/* width kolom supaya gak nabrak */
+.col-guru{width:140px}
+.col-siswa{width:180px}
+.col-tanggal{width:120px}
+.col-waktu{width:120px}
+.col-status{width:110px}
+.col-revisi{width:220px}
+.col-jenis{width:110px}
+.col-aksi{width:170px}        /* tombol muat & tetap di kolom ini */
+.col-notif{width:80px;text-align:center}
+
+/* ===== Badges ===== */
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.badge.pending  {background:#fff7e6;color:#ad6b00;border:1px solid #ffd699}
+.badge.revision {background:#fff3cd;color:#856404;border:1px solid #ffeeba}
+.badge.approved {background:#e9f9ef;color:#1e7a3b;border:1px solid #c8efd6}
+.badge.cancelled{background:#ffe8e8;color:#a12020;border:1px solid #ffc9c9}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;justify-content:center;align-items:center;padding:6px 12px;height:32px;border-radius:6px;border:none;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-success{background:#28a745;color:#fff}.btn-success:hover{background:#218838}
+.btn-danger{background:#dc3545;color:#fff}.btn-danger:hover{background:#c82333}
+.btn-bell{background:#0d6efd;color:#fff;width:36px;height:32px;padding:0}
+
+/* container tombol aksi supaya selalu sejajar & tidak wrap */
+.actions{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:nowrap}
+
+/* ===== Chip catatan revisi ===== */
+.note-chip{background:#fff3cd;border:1px solid #ffe8a1;border-radius:8px;padding:6px 10px;display:inline-block;max-width:100%;}
+
+/* ===== Modal Kirim Pesan ===== */
+.backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000}
+.modal{background:#fff;width:92%;max-width:620px;margin:6% auto;border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.2);overflow:hidden}
+.modal-head{padding:14px 16px;border-bottom:1px solid #e9ecef;display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{margin:0;font-size:18px;color:#4CAF50;font-weight:600}
+.modal-close{border:none;background:transparent;font-size:22px;line-height:1;color:#888;cursor:pointer}
+.modal-body{padding:16px}
+.modal-body textarea{width:95%;min-height:80px;resize:vertical;border:2px solid #66BB6A;border-radius:8px;background:#f9f9f9;padding:12px;font-size:14px}
+.modal-foot{padding:16px;border-top:1px solid #e9ecef;text-align:right}
 </style>
 
-<div class="dashboard-container">
-    <h1>Dashboard Guru</h1>
-    <p>Selamat datang, {{ Auth::guard('teacher')->user()->name }}!</p>
+<div class="page-wrap">
+  <div class="card">
+    <div class="card-header">
+      <h2>Dashboard Guru</h2>
+    </div>
 
-    @if(session('success'))
-        <div class="success-message">{{ session('success') }}</div>
-    @endif
+    <div class="card-body">
+      @if(session('success'))
+        <div class="alert-success">{{ session('success') }}</div>
+      @endif
 
-    <h2>Jadwal yang Perlu Anda Setujui</h2>
+      @if(!isset($schedules) || $schedules->isEmpty())
+        <p style="text-align:center;color:#666;">Tidak ada jadwal yang ditugaskan.</p>
+      @else
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-guru">Guru</th>
+                <th class="col-siswa">Siswa</th>
+                <th class="col-tanggal">Tanggal</th>
+                <th class="col-waktu">Waktu</th>
+                <th class="col-status">Status</th>
+                <th class="col-revisi">Catatan Revisi</th>
+                <th class="col-jenis">Jenis Kelas</th>
+                <th class="col-aksi">Aksi</th>
+                <th class="col-notif">Notifikasi</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($schedules as $schedule)
+                <tr>
+                  <td class="col-guru">{{ $schedule->teacher->name ?? '-' }}</td>
 
-    @if(!isset($schedules) || $schedules->isEmpty())
-        <p style="text-align:center;">Tidak ada jadwal yang ditugaskan kepada Anda.</p>
-    @else
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Waktu</th>
-                        <th>Jenis Kelas</th>
-                        <th>Nama Siswa</th>
-                        <th>Status</th>
-                        <th>Catatan Revisi</th>
-                        <th class="aksi-header">Aksi</th>
-                        <th class="notification-header">Notifikasi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($schedules as $schedule)
-                        <tr>
-                            <td>{{ $schedule->schedule_date }}</td>
-                            <td>
-                                {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
-                                –
-                                {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                            </td>
-                            <td>{{ $schedule->jenis_kelas }}</td>
-                            <td>
-                                @if($schedule->students && $schedule->students->isNotEmpty())
-                                    {{ $schedule->students->pluck('nama')->join(', ') }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td>{{ $schedule->status }}</td>
-                            <td>{{ $schedule->revision_note ?? '-' }}</td>
-                            <td class="aksi-cell">
-                                @if(in_array($schedule->status, ['pending','revision']))
-                                    <div class="action-buttons-container">
-                                        <form action="{{ route('teacher.schedules.approve', $schedule) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="action-button approve-button">Setujui</button>
-                                        </form>
+                  <td class="col-siswa">
+                    @php
+                      $names = $schedule->students?->pluck('nama') ?? collect([$schedule->student->nama ?? $schedule->student->name ?? null]);
+                      $names = $names->filter()->values();
+                    @endphp
+                    {{ $names->isNotEmpty() ? $names->join(', ') : '-' }}
+                  </td>
 
-                                        <label for="modal-toggle-{{ $schedule->id }}" class="action-button revise-button">
-                                            Revisi
-                                        </label>
-                                    </div>
-                                @elseif($schedule->status === 'approved')
-                                    <span class="approved-text">Sudah disetujui</span>
-                                @endif
-                            </td>
-                            <td class="notification-cell">
-                                <button class="action-button notify-button open-chat-modal"
-                                        data-schedule-id="{{ $schedule->id }}" title="Kirim chat ke Admin">
-                                    <i class="fas fa-bell"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                  <td class="col-tanggal">{{ $schedule->schedule_date }}</td>
+
+                  <td class="col-waktu">
+                    {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
+                    -
+                    {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                  </td>
+
+                  <td class="col-status">
+                    <span class="badge {{ $schedule->status }}">{{ $schedule->status }}</span>
+                  </td>
+
+                  <td class="col-revisi">
+                    @if($schedule->status === 'revision' && $schedule->revision_note)
+                      <span class="note-chip">{{ $schedule->revision_note }}</span>
+                    @else
+                      -
+                    @endif
+                  </td>
+
+                  <td class="col-jenis">{{ $schedule->jenis_kelas }}</td>
+
+                  <td class="col-aksi">
+                    <div class="actions">
+                      @if(in_array($schedule->status, ['pending','revision']))
+                        <form action="{{ route('teacher.schedules.approve', $schedule) }}" method="POST">
+                          @csrf
+                          <button type="submit" class="btn btn-success">Setuju</button>
+                        </form>
+
+                        <button type="button" class="btn btn-danger"
+                                onclick="openRevisionModal({{ $schedule->id }})">
+                          Revisi
+                        </button>
+                      @else
+                        <span class="badge approved">approved</span>
+                      @endif
+                    </div>
+                  </td>
+
+                  <td class="col-notif">
+                    <button type="button" class="btn btn-bell"
+                            onclick="openChatModal({{ $schedule->id }})"
+                            title="Kirim pesan ke Admin">
+                      <i class="fa-solid fa-bell"></i>
+                    </button>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
         </div>
-    @endif
+      @endif
+    </div>
+  </div>
 </div>
 
-{{-- MODAL REVISI (per-row) --}}
-@isset($schedules)
-@foreach($schedules as $schedule)
-    <input type="checkbox" id="modal-toggle-{{ $schedule->id }}" class="modal-toggle">
-    <div class="modal">
-        <div class="modal-content">
-            <label for="modal-toggle-{{ $schedule->id }}" class="close-button">&times;</label>
-            <h2>Tambahkan Catatan Revisi</h2>
-            <form method="POST" action="{{ route('teacher.schedules.revision', $schedule->id) }}">
-                @csrf
-                <textarea name="revision_note" placeholder="Tulis catatan revisi di sini..." required>{{ $schedule->revision_note ?? '' }}</textarea>
-                <button type="submit" class="submit-revision-button">Kirim Revisi</button>
-            </form>
-        </div>
+{{-- ===== Modal Revisi (reusable) ===== --}}
+<div id="revBackdrop" class="backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="revTitle">
+    <div class="modal-head">
+      <h3 id="revTitle">Catatan Revisi</h3>
+      <button class="modal-close" onclick="closeRevisionModal()">&times;</button>
     </div>
-@endforeach
-@endisset
+    <form id="revForm" method="POST">
+      @csrf
+      <div class="modal-body">
+        <textarea name="revision_note" placeholder="Tulis catatan revisi..." required></textarea>
+      </div>
+      <div class="modal-foot">
+        <button type="submit" class="btn btn-success">Kirim Revisi</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-{{-- MODAL CHAT UNTUK NOTIFIKASI --}}
-<div id="chatModal" class="modal-chat">
-    <div class="modal-chat-content">
-        <span class="close-button" onclick="closeChatModal()">&times;</span>
-        <h2>Kirim Pesan ke Admin</h2>
-        <p>Jadwal dipilih: <strong id="chat-schedule-id"></strong></p>
-        <form id="chatForm" method="POST" action="{{ route('teacher.send-note') }}">
-            @csrf
-            <input type="hidden" name="schedule_id" id="chat-schedule-input">
-            <textarea name="note_to_admin" placeholder="Tulis pesan Anda di sini..." required></textarea>
-            <button type="submit" class="submit-chat-button">Kirim Pesan</button>
-        </form>
+{{-- ===== Modal Chat (reusable) ===== --}}
+<div id="chatBackdrop" class="backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="modal-head">
+      <h3 id="chatTitle">Kirim Pesan ke Admin</h3>
+      <button class="modal-close" onclick="closeChatModal()">&times;</button>
     </div>
+    <form id="chatForm" method="POST" action="{{ route('teacher.send-note') }}">
+      @csrf
+      <input type="hidden" name="schedule_id" id="chatScheduleId">
+      <div class="modal-body">
+        <textarea name="note_to_admin" placeholder="Tulis pesan Anda..." required></textarea>
+      </div>
+      <div class="modal-foot">
+        <button type="submit" class="btn btn-success">Kirim Pesan</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const current = window.location.href;
-    document.querySelectorAll('.sidebar ul li a').forEach(a => { if (a.href === current) a.classList.add('active'); });
-
-    document.querySelectorAll('.open-chat-modal').forEach(btn => {
-        btn.addEventListener('click', function () {
-            openChatModal(this.getAttribute('data-schedule-id'));
-        });
-    });
-});
-
-const chatModal = document.getElementById('chatModal');
-const chatScheduleId = document.getElementById('chat-schedule-id');
-const chatScheduleInput = document.getElementById('chat-schedule-input');
-
-function openChatModal(id){
-    chatScheduleId.textContent = id;
-    chatScheduleInput.value = id;
-    chatModal.style.display = 'block';
+/* ===== Revisi ===== */
+function openRevisionModal(id){
+  const form = document.getElementById('revForm');
+  form.action = "{{ url('/teacher/schedules') }}/"+id+"/revision";
+  document.getElementById('revBackdrop').style.display = 'block';
 }
-function closeChatModal(){ chatModal.style.display = 'none'; }
-window.onclick = function(e){ if(e.target === chatModal){ closeChatModal(); } }
+function closeRevisionModal(){
+  document.getElementById('revBackdrop').style.display = 'none';
+}
+
+/* ===== Chat ke Admin ===== */
+function openChatModal(id){
+  document.getElementById('chatScheduleId').value = id;
+  document.getElementById('chatBackdrop').style.display = 'block';
+}
+function closeChatModal(){
+  document.getElementById('chatBackdrop').style.display = 'none';
+}
+
+/* klik di luar modal untuk tutup */
+window.addEventListener('click', function(e){
+  const rev = document.getElementById('revBackdrop');
+  const chat = document.getElementById('chatBackdrop');
+  if(e.target === rev) closeRevisionModal();
+  if(e.target === chat) closeChatModal();
+});
 </script>
 @endsection
