@@ -91,24 +91,22 @@
                 <ul class="list-group list-group-flush">
                     @foreach($notifications as $notification)
                         <li class="list-group-item">
-                            @if(isset($notification->data['type']) && $notification->data['type'] == 'revision')
+                            {{-- Memeriksa tipe notifikasi untuk menampilkan pesan yang sesuai --}}
+                            @if(isset($notification->data['revision_note']))
                                 <div class="alert alert-warning" role="alert">
-                                    <strong>Notifikasi Revisi:</strong> Jadwal
-                                    <strong>{{ $notification->data['class'] }}</strong> dari
-                                    <strong>{{ $notification->data['teacher_name'] }}</strong> membutuhkan revisi.
+                                    <strong>Pemberitahuan Revisi:</strong> Jadwal Anda telah direvisi oleh admin.
                                     <br>
-                                    <strong>Catatan:</strong> {{ $notification->data['note'] }}
+                                    <strong>Catatan Admin:</strong> {{ $notification->data['revision_note'] }}
                                 </div>
-                            @elseif(isset($notification->data['type']) && $notification->data['type'] == 'general_note')
+                            @elseif(isset($notification->data['message']))
                                 <div class="alert alert-info" role="alert">
-                                    <strong>Catatan Umum:</strong> Pesan dari
-                                    <strong>{{ $notification->data['teacher_name'] }}</strong>
+                                    <strong>Pesan Umum:</strong>
                                     <br>
-                                    <strong>Catatan:</strong> {{ $notification->data['note'] }}
+                                    {{ $notification->data['message'] }}
                                 </div>
                             @else
                                 <div class="alert alert-info" role="alert">
-                                    <strong>Notifikasi:</strong> {{ $notification->data['message'] }}
+                                    <strong>Pesan Baru:</strong> Silakan periksa detailnya.
                                 </div>
                             @endif
                             <small class="text-muted float-right">{{ $notification->created_at->diffForHumans() }}</small>

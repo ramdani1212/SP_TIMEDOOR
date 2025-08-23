@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
 use App\Http\Controllers\Teacher\ScheduleController as TeacherScheduleController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\TeacherController; // Perhatikan, ini mungkin controller umum
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -30,11 +30,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard',     [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/notifications', [AdminDashboardController::class, 'notificationsIndex'])->name('notifications.index');
 
-        Route::resource('students',   AdminStudentController::class);
-        Route::resource('users',      AdminUserController::class);
+        Route::resource('students', AdminStudentController::class);
+        Route::resource('users',    AdminUserController::class);
         Route::resource('schedules', AdminScheduleController::class);
+        
+        // PERBAIKAN: Rute approve dan revision mengarah ke AdminDashboardController
         Route::post('/schedules/{schedule}/approve',   [AdminDashboardController::class, 'approve'])->name('schedules.approve');
-        Route::post('/schedules/{schedule}/revision', [AdminDashboardController::class, 'revision'])->name('schedules.revision');
+        Route::post('/schedules/{schedule}/revision',  [AdminDashboardController::class, 'revision'])->name('schedules.revision');
 
         Route::get('/profile',         [AdminController::class, 'showProfile'])->name('profile.show');
         Route::get('/change-password', [AdminController::class, 'showChangePasswordForm'])->name('password.edit');
@@ -59,16 +61,16 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/change-password', [TeacherDashboardController::class, 'showChangePasswordForm'])->name('password.edit');
         Route::post('/change-password',[TeacherDashboardController::class, 'updatePassword'])->name('password.update');
 
+        // PERBAIKAN: Rute approve dan revision mengarah ke TeacherDashboardController
         Route::post('/schedules/{schedule}/approve',   [TeacherDashboardController::class, 'approve'])->name('schedules.approve');
-        Route::post('/schedules/{schedule}/revision', [TeacherDashboardController::class, 'revision'])->name('schedules.revision');
+        Route::post('/schedules/{schedule}/revision',  [TeacherDashboardController::class, 'revision'])->name('schedules.revision');
 
         Route::post('/send-note',      [TeacherDashboardController::class, 'sendNoteToAdmin'])->name('send-note');
         Route::get('/notifications',   [TeacherDashboardController::class, 'notificationsIndex'])->name('notifications.index');
         
-        // Rute untuk menampilkan form catatan revisi
+        // Rute untuk menampilkan form catatan revisi (jika diperlukan)
+        // Periksa apakah 'TeacherController' ada di project Anda
         Route::get('/schedules/{schedule}/create-revision', [TeacherController::class, 'createRevision'])->name('schedules.createRevision');
-        
-        // Rute untuk mengirim catatan revisi
         Route::post('/schedules/{schedule}/submit-revision', [TeacherController::class, 'submitRevision'])->name('schedules.submitRevision');
 
         Route::resource('schedules', TeacherScheduleController::class)->except(['show']);

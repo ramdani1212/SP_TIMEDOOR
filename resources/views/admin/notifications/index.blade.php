@@ -28,14 +28,34 @@
     }
 
     /* Mengatur daftar notifikasi */
-    .list-group-item {
-        border: none;
-        border-bottom: 1px solid #e0e0e0;
-        padding: 20px 25px;
+    .table-responsive {
+        overflow-x: auto;
     }
-
-    .list-group-item:last-child {
-        border-bottom: none;
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table thead th {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+    }
+    
+    .table tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+    
+    .table tbody td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
     }
 
     /* Mengatur pesan notifikasi */
@@ -58,17 +78,6 @@
         color: #2196F3;
     }
 
-    /* Mengatur tautan dan waktu */
-    .text-muted {
-        font-size: 0.85rem;
-        margin-top: 10px;
-        display: block;
-    }
-
-    .float-right {
-        float: right;
-    }
-
     /* Mengatur teks jika tidak ada notifikasi */
     .text-center {
         color: #777;
@@ -85,6 +94,7 @@
         border-color: #4CAF50;
     }
 </style>
+
 <div class="container">
     <div class="card">
         <div class="card-header">
@@ -94,29 +104,46 @@
             @if($notifications->isEmpty())
                 <p class="text-center">Tidak ada notifikasi yang tersedia.</p>
             @else
-                <ul class="list-group list-group-flush">
-                    @foreach($notifications as $notification)
-                        <li class="list-group-item">
-                            @if(isset($notification->data['type']) && $notification->data['type'] == 'revision')
-                                <div class="alert alert-warning" role="alert">
-                                    <strong>Notifikasi Revisi:</strong> Jadwal
-                                    <strong>{{ $notification->data['class'] }}</strong> dari
-                                    <strong>{{ $notification->data['teacher_name'] }}</strong> membutuhkan revisi.
-                                    <br>
-                                    <strong>Catatan:</strong> {{ $notification->data['note'] }}
-                                </div>
-                            @elseif(isset($notification->data['type']) && $notification->data['type'] == 'general_note')
-                                <div class="alert alert-info" role="alert">
-                                    <strong>Catatan Umum:</strong> Pesan dari
-                                    <strong>{{ $notification->data['teacher_name'] }}</strong>
-                                    <br>
-                                    <strong>Catatan:</strong> {{ $notification->data['note'] }}
-                                </div>
-                            @endif
-                            <small class="text-muted float-right">{{ $notification->created_at->diffForHumans() }}</small>
-                        </li>
-                    @endforeach
-                </ul>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Pengirim</th>
+                                <th>Pesan</th>
+                                <th>Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($notifications as $notification)
+                                <tr>
+                                    <td>{{ $notification->data['teacher']['name'] ?? 'Admin' }}</td>
+                                    <td>
+                                        @if(isset($notification->data['schedule']))
+                                            <div class="alert alert-warning" role="alert">
+                                                <strong>Notifikasi Revisi:</strong> Jadwal Kelas <strong>{{ $notification->data['schedule']['jenis_kelas'] }}</strong> membutuhkan revisi.
+                                                <br>
+                                                <strong>Catatan:</strong> {{ $notification->data['revision_note'] ?? 'Tidak ada catatan.' }}
+                                            </div>
+                                        @elseif(isset($notification->data['note_to_admin']))
+                                            <div class="alert alert-info" role="alert">
+                                                <strong>Catatan Umum:</strong>
+                                                <br>
+                                                <strong>Pesan:</strong> {{ $notification->data['note_to_admin'] }}
+                                            </div>
+                                        @else
+                                            <div class="alert alert-info" role="alert">
+                                                Notifikasi baru.
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
                 <div class="mt-3">
                     {{ $notifications->links() }}
                 </div>

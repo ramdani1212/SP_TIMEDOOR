@@ -14,30 +14,41 @@ use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
 {
+    /**
+     * Menampilkan dashboard guru dengan daftar jadwal yang ditugaskan kepadanya.
+     */
     public function index()
     {
-        // Eager load 'students' (jamak), bukan 'student'
         $teacher = Auth::guard('teacher')->user();
 
         $schedules = $teacher->schedules()
-            ->with(['students'])   // <— penting
+            ->with(['students'])
             ->latest('schedule_date')
             ->get();
 
         return view('teacher.dashboard', compact('schedules'));
     }
 
+    /**
+     * Menampilkan halaman profil guru.
+     */
     public function showProfile()
     {
         $teacher = Auth::guard('teacher')->user();
         return view('teacher.profile.show', compact('teacher'));
     }
 
+    /**
+     * Menampilkan form untuk mengubah password.
+     */
     public function showChangePasswordForm()
     {
         return view('teacher.change-password');
     }
 
+    /**
+     * Memperbarui password guru.
+     */
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -59,6 +70,9 @@ class DashboardController extends Controller
         return back()->with('success', 'Password berhasil diubah!');
     }
 
+    /**
+     * Menyetujui jadwal yang dipilih.
+     */
     public function approve(Schedule $schedule)
     {
         if ($schedule->teacher_id !== Auth::guard('teacher')->id()) {
@@ -68,6 +82,10 @@ class DashboardController extends Controller
         return back()->with('success', 'Jadwal berhasil disetujui!');
     }
 
+    /**
+     * Mengubah status jadwal menjadi revisi dan menambahkan catatan,
+     * lalu mengirim notifikasi ke admin.
+     */
     public function revision(Request $request, Schedule $schedule)
     {
         if ($schedule->teacher_id !== Auth::guard('teacher')->id()) {
@@ -80,26 +98,28 @@ class DashboardController extends Controller
 
         $schedule->update(['status' => 'revision', 'revision_note' => $request->revision_note]);
 
-        // kirim notifikasi ke admin (contoh ambil user role_id = 1)
-        $admin = \App\Models\User::where('role_id', 1)->first();
+        $admin = User::where('role', 'admin')->first(); 
         if ($admin) {
-            $teacher = Auth::guard('teacher')->user(); // <— gunakan guard teacher
+            $teacher = Auth::guard('teacher')->user();
             $admin->notify(new TeacherNoteNotification($request->revision_note, $teacher, $schedule));
         }
 
         return back()->with('success', 'Jadwal berhasil direvisi dengan catatan!');
     }
 
+    /**
+     * Mengirim notifikasi catatan umum dari guru ke admin.
+     */
     public function sendNoteToAdmin(Request $request)
     {
         $request->validate([
             'note_to_admin' => 'required|string|max:1000',
         ]);
 
-        $admin = \App\Models\User::where('role_id', 1)->first();
+        $admin = User::where('role', 'admin')->first();
 
         if ($admin) {
-            $teacher = Auth::guard('teacher')->user(); // <— guard teacher
+            $teacher = Auth::guard('teacher')->user(); 
             if ($request->filled('schedule_id')) {
                 $schedule = Schedule::with('students')->find($request->schedule_id);
                 if ($schedule) {
@@ -113,6 +133,9 @@ class DashboardController extends Controller
         return back()->with('success', 'Catatan berhasil dikirim ke admin.');
     }
 
+    /**
+     * Menampilkan riwayat notifikasi untuk guru.
+     */
     public function notificationsIndex()
     {
         $teacher = Auth::guard('teacher')->user();

@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Schedule;// Penting: Gunakan model User untuk guru
+use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -14,8 +15,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Ambil semua schedule beserta teacher & students
-        // Relasi `teacher` di model Schedule harus mengarah ke model User
+        // PERBAIKAN: Memuat relasi 'teacher' dan 'students' (jamak)
         $schedules = Schedule::with(['teacher', 'students'])->latest()->get();
 
         return view('admin.dashboard', compact('schedules'));
@@ -38,15 +38,13 @@ class DashboardController extends Controller
     /**
      * Menampilkan form untuk membuat jadwal baru.
      */
-   
-
     public function create()
     {
-    // Pastikan Anda menggunakan kode ini:
-    $teachers = \App\Models\User::where('role', 'teacher')->get();
-    $students = \App\Models\Student::all();
+        // Pastikan Anda menggunakan kode ini:
+        $teachers = \App\Models\User::where('role', 'teacher')->get();
+        $students = \App\Models\Student::all();
 
-    return view('admin.schedules.create', compact('teachers', 'students'));
+        return view('admin.schedules.create', compact('teachers', 'students'));
     }
 
     /**
@@ -55,7 +53,7 @@ class DashboardController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // Perbaikan: Validasi teacher_id harus ada di tabel 'users', bukan 'teachers'
+            // Validasi teacher_id harus ada di tabel 'users'
             'teacher_id'     => 'required|exists:users,id',
             'schedule_date'  => 'required|date',
             'start_time'     => 'required|date_format:H:i',

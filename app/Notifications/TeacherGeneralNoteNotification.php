@@ -5,34 +5,32 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\DatabaseMessage;
-use App\Models\User;
+use App\Models\Teacher;
 
-class TeacherGeneralNoteNotification extends Notification
+class TeacherGeneralNoteNotification extends Notification implements ShouldQueue
 {
     use Queueable;
-    protected $note;
-    protected $teacher;
 
-    public function __construct(string $note, User $teacher)
+    protected $teacher;
+    protected $note;
+
+    public function __construct(Teacher $teacher, string $note)
     {
-        $this->note = $note;
         $this->teacher = $teacher;
+        $this->note = $note;
     }
 
-    public function via($notifiable)
+    public function via(object $notifiable): array
     {
         return ['database'];
     }
 
-    public function toDatabase($notifiable)
+    public function toArray(object $notifiable): array
     {
-        return new DatabaseMessage([
+        return [
             'type' => 'general_note',
-            'message' => 'Catatan umum baru dari Guru ' . $this->teacher->name . '.',
-            'note' => $this->note,
             'teacher_name' => $this->teacher->name,
-            'teacher_id' => $this->teacher->id,
-        ]);
+            'note' => $this->note,
+        ];
     }
 }
