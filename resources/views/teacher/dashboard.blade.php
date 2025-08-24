@@ -32,12 +32,12 @@ tbody tr:hover{background:#f1f8f4}
 .col-status{width:110px}
 .col-revisi{width:220px}
 .col-jenis{width:110px}
-.col-aksi{width:170px}        /* tombol muat & tetap di kolom ini */
+.col-aksi{width:170px}
 .col-notif{width:80px;text-align:center}
 
 /* ===== Badges ===== */
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
-.badge.pending  {background:#fff7e6;color:#ad6b00;border:1px solid #ffd699}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600; text-transform: capitalize;}
+.badge.pending  {background:#fff7e6;color:#ad6b00;border:1px solid #ffd699}
 .badge.revision {background:#fff3cd;color:#856404;border:1px solid #ffeeba}
 .badge.approved {background:#e9f9ef;color:#1e7a3b;border:1px solid #c8efd6}
 .badge.cancelled{background:#ffe8e8;color:#a12020;border:1px solid #ffc9c9}
@@ -131,18 +131,21 @@ tbody tr:hover{background:#f1f8f4}
 
                   <td class="col-aksi">
                     <div class="actions">
-                      @if(in_array($schedule->status, ['pending','revision']))
+                      @if($schedule->status === 'pending')
                         <form action="{{ route('teacher.schedules.approve', $schedule) }}" method="POST">
                           @csrf
                           <button type="submit" class="btn btn-success">Setuju</button>
                         </form>
-
                         <button type="button" class="btn btn-danger"
                                 onclick="openRevisionModal({{ $schedule->id }})">
                           Revisi
                         </button>
+                      @elseif($schedule->status === 'approved')
+                        <span class="badge approved">Sudah disetujui</span>
+                      @elseif($schedule->status === 'revision')
+                        <span class="badge revision">Perlu revisi</span>
                       @else
-                        <span class="badge approved">approved</span>
+                        -
                       @endif
                     </div>
                   </td>
