@@ -21,8 +21,8 @@
     background-color: #4CAF50;
     color: white;
     font-weight: bold;
-    font-size: 1.25rem;
-    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    padding: 0.25rem 0.75rem;
     border-bottom: none;
 }
 
@@ -120,6 +120,8 @@
 
 /* Teks judul h2 di dalam card-header */
 .card-header h2 {
+    font-size: 1rem;       /* perkecil ukuran teks judul */
+    margin: 0;   
     color: white;
 }
 </style>
