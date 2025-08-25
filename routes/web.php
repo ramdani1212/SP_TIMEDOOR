@@ -40,6 +40,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('notifications.index');
         Route::patch('/notifications/{notification}/mark-as-read', [AdminController::class, 'markAsRead'])
             ->name('notifications.markAsRead');
+        Route::delete('/notifications/{notification}', [AdminController::class, 'destroyNotification'])->name('notifications.destroy');
 
         // CRUD resources
         Route::resource('students',  AdminStudentController::class);
@@ -80,7 +81,8 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
             ->name('notifications.index');
         Route::patch('/notifications/{notification}/mark-as-read', [TeacherDashboardController::class, 'markAsRead'])
             ->name('notifications.markAsRead');
-
+        Route::delete('/notifications/{notification}', [TeacherDashboardController::class, 'destroyNotification'])
+    ->name('notifications.delete');
         // Teacher kirim catatan ke admin
         Route::post('/send-note', [TeacherDashboardController::class, 'sendNoteToAdmin'])->name('send-note');
 

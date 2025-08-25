@@ -8,11 +8,11 @@
 .container {
     padding-top: 30px;
     padding-bottom: 30px;
-    margin-left: 20px;   /* tambah jarak dari sidebar */
+    margin-left: 20px;   /* jarak dari sidebar */
 }
 
 .card {
-    margin-top: 20px;    /* tambah jarak ke atas */
+    margin-top: 20px;    /* jarak ke atas */
 }
 
 .card-header {
@@ -25,11 +25,11 @@
 }
 
 .card-body {
-    padding: 0.5rem; /* backdrop sedikit kecil */
-    background-color: #f7fff7; /* Backdrop hijau muda */
+    padding: 0.5rem;
+    background-color: #f7fff7;
 }
 
-/* ===== Notifikasi Boxes (Card) ===== */
+/* ===== Notifikasi Boxes ===== */
 .notification-box {
     background-color: #fff;
     border: 1px solid #e0e0e0;
@@ -50,7 +50,6 @@
     align-items: center;
     font-size: 1.1rem;
 }
-/* Ikon notifikasi */
 .notification-icon { margin-right: 10px; color: #4CAF50; }
 .notification-message { margin-top: 0.5rem; color: #555; }
 .notification-extra-info {
@@ -59,10 +58,6 @@
     padding: 10px; border-radius: 4px;
 }
 .notification-timestamp { font-size: 0.8rem; color: #999; margin-top: 0.5rem; }
-.notification-link {
-    display: inline-block; margin-top: 10px; font-weight: 600;
-    color: #007bff; text-decoration: none;
-}
 
 /* ===== Tombol & Alerts ===== */
 .btn-read {
@@ -73,6 +68,22 @@
     transition: background-color 0.3s, color 0.3s, transform 0.2s;
 }
 .btn-read:hover { transform: translateY(-1px); }
+
+/* Tombol Hapus (merah) */
+.btn-danger {
+    background-color: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, transform 0.2s;
+}
+.btn-danger:hover {
+    background-color: #c62828;
+    transform: translateY(-1px);
+}
 
 .alert-empty {
     background-color: #e9ecef;
@@ -89,9 +100,9 @@
     margin-top: 2rem;
 }
 
-/* Teks judul h2 di dalam card-header */
+/* Judul di card-header */
 .card-header h2 {
-    font-size: 1rem; /* kecilkan sedikit */
+    font-size: 1rem;
     margin: 0;
     color: white;
 }
@@ -119,7 +130,6 @@
           $data = is_array($n->data) ? $n->data : [];
           $title = $data['title'] ?? 'Notifikasi';
           $message = $data['message'] ?? '';
-          $url = $data['url'] ?? null;
         @endphp
 
         <div class="notification-box d-flex justify-content-between align-items-start">
@@ -131,7 +141,7 @@
               <div class="notification-message">{{ $message }}</div>
             @endif
 
-            {{-- Extra info (opsional) --}}
+            {{-- Extra info --}}
             @if(!empty($data['schedule']) && is_array($data['schedule']))
               <div class="notification-extra-info">
                 @php $sch = $data['schedule']; @endphp
@@ -141,12 +151,6 @@
                 @endif
                 @if(!empty($sch['jenis']))<div><strong>Jenis:</strong> {{ $sch['jenis'] }}</div>@endif
                 @if(!empty($sch['status']))<div><strong>Status:</strong> {{ ucfirst($sch['status']) }}</div>@endif
-              </div>
-            @endif
-
-            @if(!empty($url))
-              <div class="notification-link">
-                <a href="{{ $url }}">Buka</a>
               </div>
             @endif
 
@@ -171,36 +175,39 @@
           $data = is_array($n->data) ? $n->data : [];
           $title = $data['title'] ?? 'Notifikasi';
           $message = $data['message'] ?? '';
-          $url = $data['url'] ?? null;
         @endphp
 
-        <div class="notification-box">
-          <div class="notification-title">
-            <i class="far fa-bell notification-icon"></i> {{ $title }}
+        <div class="notification-box d-flex justify-content-between align-items-start">
+          <div>
+            <div class="notification-title">
+              <i class="far fa-bell notification-icon"></i> {{ $title }}
+            </div>
+            @if($message !== '')
+              <div class="notification-message">{{ $message }}</div>
+            @endif
+
+            @if(!empty($data['schedule']) && is_array($data['schedule']))
+              <div class="notification-extra-info">
+                @php $sch = $data['schedule']; @endphp
+                @if(!empty($sch['date']))<div><strong>Tanggal:</strong> {{ $sch['date'] }}</div>@endif
+                @if(!empty($sch['start_time']) || !empty($sch['end_time']))
+                  <div><strong>Waktu:</strong> {{ $sch['start_time'] ?? '-' }} - {{ $sch['end_time'] ?? '-' }}</div>
+                @endif
+                @if(!empty($sch['jenis']))<div><strong>Jenis:</strong> {{ $sch['jenis'] }}</div>@endif
+                @if(!empty($sch['status']))<div><strong>Status:</strong> {{ ucfirst($sch['status']) }}</div>@endif
+              </div>
+            @endif
+
+            <div class="notification-timestamp">{{ $n->created_at->format('d M Y H:i') }}</div>
           </div>
-          @if($message !== '')
-            <div class="notification-message">{{ $message }}</div>
-          @endif
 
-          @if(!empty($data['schedule']) && is_array($data['schedule']))
-            <div class="notification-extra-info">
-              @php $sch = $data['schedule']; @endphp
-              @if(!empty($sch['date']))<div><strong>Tanggal:</strong> {{ $sch['date'] }}</div>@endif
-              @if(!empty($sch['start_time']) || !empty($sch['end_time']))
-                <div><strong>Waktu:</strong> {{ $sch['start_time'] ?? '-' }} - {{ $sch['end_time'] ?? '-' }}</div>
-              @endif
-              @if(!empty($sch['jenis']))<div><strong>Jenis:</strong> {{ $sch['jenis'] }}</div>@endif
-              @if(!empty($sch['status']))<div><strong>Status:</strong> {{ ucfirst($sch['status']) }}</div>@endif
-            </div>
-          @endif
-
-          @if(!empty($url))
-            <div class="notification-link">
-              <a href="{{ $url }}">Buka</a>
-            </div>
-          @endif
-
-          <div class="notification-timestamp">{{ $n->created_at->format('d M Y H:i') }}</div>
+          {{-- Tombol hapus merah --}}
+          <form action="{{ route('teacher.notifications.delete',$n->id) }}" method="POST" onsubmit="return confirm('Yakin mau hapus notifikasi ini?')">
+            @csrf @method('DELETE')
+            <button class="btn btn-danger">
+              <i class="fas fa-trash-alt"></i> Hapus
+            </button>
+          </form>
         </div>
       @empty
         <div class="alert-empty">Belum ada riwayat notifikasi.</div>

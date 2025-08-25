@@ -7,11 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Notification;
 use App\Models\Schedule;
 use App\Models\User;
-use App\Notifications\TeacherNoteNotification;
-use App\Notifications\TeacherGeneralNoteNotification;
+use App\Notifications\TeacherNoteNotification;           // untuk REVISI jadwal
+use App\Notifications\TeacherGeneralNoteNotification;   // untuk PESAN UMUM (ikon lonceng)
 
 class DashboardController extends Controller
 {
@@ -79,13 +78,18 @@ class DashboardController extends Controller
         if ($schedule->teacher_id !== Auth::guard('teacher')->id()) {
             abort(403);
         }
-        $schedule->update(['status' => 'approved', 'revision_note' => null]);
+
+        $schedule->update([
+            'status'        => 'approved',
+            'revision_note' => null,
+        ]);
+
         return back()->with('success', 'Jadwal berhasil disetujui!');
     }
 
     /**
      * Mengubah status jadwal menjadi revisi dan menambahkan catatan,
-     * lalu mengirim notifikasi ke admin.
+     * lalu mengirim notifikasi ke admin (INI KHUSUS REVISI).
      */
     public function revision(Request $request, Schedule $schedule)
     {
@@ -105,42 +109,52 @@ class DashboardController extends Controller
         $admin = User::where('role', 'admin')->first();
         if ($admin) {
             $teacher = Auth::guard('teacher')->user();
-            $admin->notify(new TeacherNoteNotification($request->revision_note, $teacher, $schedule));
+            // Notifikasi revisi (konten “guru meminta revisi”)
+            $admin->notify(new TeacherNoteNotification(
+                $request->revision_note,
+                $teacher,
+                $schedule
+            ));
         }
 
         return back()->with('success', 'Jadwal berhasil direvisi dengan catatan!');
     }
 
     /**
-     * Mengirim notifikasi catatan umum dari guru ke admin.
+     * Mengirim NOTIFIKASI PESAN UMUM dari guru ke admin (tombol lonceng).
+     * BUKAN revisi jadwal.
      */
     public function sendNoteToAdmin(Request $request)
     {
         $request->validate([
             'note_to_admin' => 'required|string|max:1000',
+            'schedule_id'   => 'nullable|integer',
         ]);
 
         $admin = User::where('role', 'admin')->first();
-
-        if ($admin) {
-            $teacher = Auth::guard('teacher')->user();
-            if ($request->filled('schedule_id')) {
-                $schedule = Schedule::with('students')->find($request->schedule_id);
-                if ($schedule) {
-                    $admin->notify(new TeacherNoteNotification($request->note_to_admin, $teacher, $schedule));
-                }
-            } else {
-                $admin->notify(new TeacherGeneralNoteNotification($request->note_to_admin, $teacher));
-            }
+        if (!$admin) {
+            return back()->with('error', 'Admin tidak ditemukan.');
         }
 
-        return back()->with('success', 'Catatan berhasil dikirim ke admin.');
+        $teacher  = Auth::guard('teacher')->user();
+        $schedule = null;
+
+        if ($request->filled('schedule_id')) {
+            $schedule = Schedule::with('students', 'teacher')->find($request->schedule_id);
+        }
+
+        // Notifikasi PESAN UMUM (supaya isi notif = pesan guru, bukan “revisi”)
+        $admin->notify(new TeacherGeneralNoteNotification(
+            note: $request->note_to_admin,
+            teacher: $teacher,
+            schedule: $schedule
+        ));
+
+        return back()->with('success', 'Pesan berhasil dikirim ke admin.');
     }
 
     /**
      * Menampilkan riwayat notifikasi untuk guru.
-     * - $unread untuk bagian "Belum Dibaca"
-     * - $all untuk semua notifikasi (pagination)
      */
     public function notificationsIndex()
     {
@@ -159,11 +173,19 @@ class DashboardController extends Controller
     {
         $teacher = Auth::guard('teacher')->user();
         $notification = $teacher->notifications()->findOrFail($id);
-
-        if ($notification) {
-            $notification->markAsRead();
-        }
+        $notification->markAsRead();
 
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
+    }
+
+    public function destroyNotification(string $id)
+    {
+        $teacher = Auth::guard('teacher')->user();
+
+        // pastikan yang dihapus milik si teacher ini
+        $notification = $teacher->notifications()->where('id', $id)->firstOrFail();
+        $notification->delete();
+
+        return back()->with('success', 'Notifikasi berhasil dihapus.');
     }
 }

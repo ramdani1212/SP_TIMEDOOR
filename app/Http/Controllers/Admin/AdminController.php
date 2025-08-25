@@ -64,4 +64,13 @@ class AdminController extends Controller
         $notification->markAsRead();
         return back()->with('success', 'Notifikasi berhasil ditandai sudah dibaca.');
     }
+
+        public function destroyNotification(string $notificationId)
+    {
+        $user = Auth::user();
+        $n = $user->notifications()->where('id', $notificationId)->firstOrFail();
+        $n->delete();
+
+        return back()->with('success', 'Notifikasi berhasil dihapus.');
+    }
 }
