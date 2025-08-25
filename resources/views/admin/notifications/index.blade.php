@@ -5,16 +5,14 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
-/* ===== Kontainer & Layout Utama ===== */
 .container {
     padding-top: 30px;
     padding-bottom: 30px;
+    margin-left: 20px;   /* tambah jarak dari sidebar */
 }
 
 .card {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    margin-top: 20px;    /* tambah jarak ke atas */
 }
 
 .card-header {

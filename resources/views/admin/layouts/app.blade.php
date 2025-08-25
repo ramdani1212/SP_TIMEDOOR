@@ -38,6 +38,7 @@
     }
     .sidebar ul li a i { margin-right: 10px; }
     .sidebar ul li a:hover, .sidebar ul li a.active { background-color: white; color: #4CAF50; }
+
     .content { flex-grow: 1; padding: 40px; margin-left: 250px; transition: margin-left 0.3s ease; position: relative; }
     .content.full-width { margin-left: 0; }
 
@@ -46,6 +47,30 @@
         gap: 12px;
         padding-bottom: 20px; border-bottom: 1px solid #ddd; margin-bottom: 20px;
     }
+
+    /* === Lonceng Notifikasi === */
+    .bell-btn {
+        position: relative;
+        display: inline-block;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 5px;
+        text-decoration: none;
+    }
+    .bell-btn i {
+        color: #4CAF50 !important;
+        font-size: 20px;
+        line-height: 1;
+    }
+    .bell-btn:hover i { color: #3d8b40 !important; }
+    .badge-notif {
+        position: absolute; top: -6px; right: -8px;
+        background: #e53935; color: #fff;
+        border-radius: 999px;
+        padding: 2px 5px; font-size: 11px; line-height: 1;
+    }
+
     .top-header a {
         text-decoration: none; color: white; background-color: #2196F3;
         padding: 8px 15px; border-radius: 5px; transition: background-color 0.3s ease;
@@ -53,15 +78,6 @@
     .top-header a:hover { background-color: #1976D2; }
     .top-header .password-btn { background-color: #FF9800; }
     .top-header .password-btn:hover { background-color: #FB8C00; }
-
-    /* Tombol bell & badge notif */
-    .bell-btn { position: relative; background: transparent !important; color: #333 !important; padding: 0 !important; }
-    .bell-btn:hover { color: #000 !important; background: transparent !important; }
-    .badge-notif {
-        position: absolute; top: -6px; right: -10px;
-        background: #e53935; color: #fff; border-radius: 999px;
-        padding: 2px 6px; font-size: 11px; line-height: 1;
-    }
 
     .logout-button { background-color: #f44336; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; display: block; width: 100%; margin-top: 20px; }
     .dashboard-container { max-width: 900px; margin: 40px auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
@@ -113,11 +129,11 @@
             <div class="top-header">
                 {{-- Lonceng Notifikasi --}}
                 @php
-                  $adminUser = Auth::user(); // guard web
+                  $adminUser = Auth::user();
                   $adminUnread = $adminUser ? $adminUser->unreadNotifications()->count() : 0;
                 @endphp
                 <a href="{{ route('admin.notifications.index') }}" class="bell-btn" title="Notifikasi">
-                    <i class="fas fa-bell fa-lg"></i>
+                    <i class="fas fa-bell"></i>
                     @if($adminUnread > 0)
                         <span class="badge-notif">{{ $adminUnread }}</span>
                     @endif

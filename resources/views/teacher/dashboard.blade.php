@@ -24,7 +24,7 @@ thead th{background:#4CAF50;color:#fff;font-weight:700}
 tbody tr:nth-child(even){background:#f7f7f7}
 tbody tr:hover{background:#f1f8f4}
 
-/* width kolom supaya gak nabrak */
+/* width kolom */
 .col-guru{width:140px}
 .col-siswa{width:180px}
 .col-tanggal{width:120px}
@@ -36,11 +36,34 @@ tbody tr:hover{background:#f1f8f4}
 .col-notif{width:80px;text-align:center}
 
 /* ===== Badges ===== */
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600; text-transform: capitalize;}
-.badge.pending  {background:#fff7e6;color:#ad6b00;border:1px solid #ffd699}
-.badge.revision {background:#fff3cd;color:#856404;border:1px solid #ffeeba}
-.badge.approved {background:#e9f9ef;color:#1e7a3b;border:1px solid #c8efd6}
-.badge.cancelled{background:#ffe8e8;color:#a12020;border:1px solid #ffc9c9}
+.badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  text-transform:capitalize;
+}
+.badge.pending{
+  background:#fff7e6;   /* krem */
+  color:#ad6b00;        /* oranye tua */
+  border:1px solid #ffd699;
+}
+.badge.revision{
+  background:#fff3cd;
+  color:#856404;
+  border:1px solid #ffeeba;
+}
+.badge.approved{
+  background:#e9f9ef;
+  color:#1e7a3b;
+  border:1px solid #c8efd6;
+}
+.badge.cancelled{
+  background:#ffe8e8;
+  color:#a12020;
+  border:1px solid #ffc9c9;
+}
 
 /* ===== Buttons ===== */
 .btn{display:inline-flex;justify-content:center;align-items:center;padding:6px 12px;height:32px;border-radius:6px;border:none;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;white-space:nowrap}
@@ -48,13 +71,12 @@ tbody tr:hover{background:#f1f8f4}
 .btn-danger{background:#dc3545;color:#fff}.btn-danger:hover{background:#c82333}
 .btn-bell{background:#0d6efd;color:#fff;width:36px;height:32px;padding:0}
 
-/* container tombol aksi supaya selalu sejajar & tidak wrap */
 .actions{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:nowrap}
 
 /* ===== Chip catatan revisi ===== */
-.note-chip{background:#fff3cd;border:1px solid #ffe8a1;border-radius:8px;padding:6px 10px;display:inline-block;max-width:100%;}
+.note-chip{background:#fff3cd;border:1px solid #ffe8a1;border-radius:8px;padding:6px 10px;display:inline-block;max-width:100%}
 
-/* ===== Modal Kirim Pesan ===== */
+/* ===== Modal ===== */
 .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000}
 .modal{background:#fff;width:92%;max-width:620px;margin:6% auto;border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.2);overflow:hidden}
 .modal-head{padding:14px 16px;border-bottom:1px solid #e9ecef;display:flex;justify-content:space-between;align-items:center}
@@ -97,49 +119,33 @@ tbody tr:hover{background:#f1f8f4}
             <tbody>
               @foreach($schedules as $schedule)
                 <tr>
-                  <td class="col-guru">{{ $schedule->teacher->name ?? '-' }}</td>
-
-                  <td class="col-siswa">
+                  <td>{{ $schedule->teacher->name ?? '-' }}</td>
+                  <td>
                     @php
                       $names = $schedule->students?->pluck('nama') ?? collect([$schedule->student->nama ?? $schedule->student->name ?? null]);
                       $names = $names->filter()->values();
                     @endphp
                     {{ $names->isNotEmpty() ? $names->join(', ') : '-' }}
                   </td>
-
-                  <td class="col-tanggal">{{ $schedule->schedule_date }}</td>
-
-                  <td class="col-waktu">
-                    {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
-                    -
-                    {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                  </td>
-
-                  <td class="col-status">
-                    <span class="badge {{ $schedule->status }}">{{ $schedule->status }}</span>
-                  </td>
-
-                  <td class="col-revisi">
+                  <td>{{ $schedule->schedule_date }}</td>
+                  <td>{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}</td>
+                  <td><span class="badge {{ $schedule->status }}">{{ $schedule->status }}</span></td>
+                  <td>
                     @if($schedule->status === 'revision' && $schedule->revision_note)
                       <span class="note-chip">{{ $schedule->revision_note }}</span>
                     @else
                       -
                     @endif
                   </td>
-
-                  <td class="col-jenis">{{ $schedule->jenis_kelas }}</td>
-
-                  <td class="col-aksi">
+                  <td>{{ $schedule->jenis_kelas }}</td>
+                  <td>
                     <div class="actions">
                       @if($schedule->status === 'pending')
                         <form action="{{ route('teacher.schedules.approve', $schedule) }}" method="POST">
                           @csrf
                           <button type="submit" class="btn btn-success">Setuju</button>
                         </form>
-                        <button type="button" class="btn btn-danger"
-                                onclick="openRevisionModal({{ $schedule->id }})">
-                          Revisi
-                        </button>
+                        <button type="button" class="btn btn-danger" onclick="openRevisionModal({{ $schedule->id }})">Revisi</button>
                       @elseif($schedule->status === 'approved')
                         <span class="badge approved">Sudah disetujui</span>
                       @elseif($schedule->status === 'revision')
@@ -149,11 +155,8 @@ tbody tr:hover{background:#f1f8f4}
                       @endif
                     </div>
                   </td>
-
-                  <td class="col-notif">
-                    <button type="button" class="btn btn-bell"
-                            onclick="openChatModal({{ $schedule->id }})"
-                            title="Kirim pesan ke Admin">
+                  <td>
+                    <button type="button" class="btn btn-bell" onclick="openChatModal({{ $schedule->id }})" title="Kirim pesan ke Admin">
                       <i class="fa-solid fa-bell"></i>
                     </button>
                   </td>
@@ -167,11 +170,11 @@ tbody tr:hover{background:#f1f8f4}
   </div>
 </div>
 
-{{-- ===== Modal Revisi (reusable) ===== --}}
+{{-- Modal Revisi --}}
 <div id="revBackdrop" class="backdrop">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="revTitle">
+  <div class="modal">
     <div class="modal-head">
-      <h3 id="revTitle">Catatan Revisi</h3>
+      <h3>Catatan Revisi</h3>
       <button class="modal-close" onclick="closeRevisionModal()">&times;</button>
     </div>
     <form id="revForm" method="POST">
@@ -186,11 +189,11 @@ tbody tr:hover{background:#f1f8f4}
   </div>
 </div>
 
-{{-- ===== Modal Chat (reusable) ===== --}}
+{{-- Modal Chat --}}
 <div id="chatBackdrop" class="backdrop">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+  <div class="modal">
     <div class="modal-head">
-      <h3 id="chatTitle">Kirim Pesan ke Admin</h3>
+      <h3>Kirim Pesan ke Admin</h3>
       <button class="modal-close" onclick="closeChatModal()">&times;</button>
     </div>
     <form id="chatForm" method="POST" action="{{ route('teacher.send-note') }}">
@@ -207,31 +210,22 @@ tbody tr:hover{background:#f1f8f4}
 </div>
 
 <script>
-/* ===== Revisi ===== */
 function openRevisionModal(id){
   const form = document.getElementById('revForm');
   form.action = "{{ url('/teacher/schedules') }}/"+id+"/revision";
   document.getElementById('revBackdrop').style.display = 'block';
 }
-function closeRevisionModal(){
-  document.getElementById('revBackdrop').style.display = 'none';
-}
+function closeRevisionModal(){ document.getElementById('revBackdrop').style.display = 'none'; }
 
-/* ===== Chat ke Admin ===== */
 function openChatModal(id){
   document.getElementById('chatScheduleId').value = id;
   document.getElementById('chatBackdrop').style.display = 'block';
 }
-function closeChatModal(){
-  document.getElementById('chatBackdrop').style.display = 'none';
-}
+function closeChatModal(){ document.getElementById('chatBackdrop').style.display = 'none'; }
 
-/* klik di luar modal untuk tutup */
 window.addEventListener('click', function(e){
-  const rev = document.getElementById('revBackdrop');
-  const chat = document.getElementById('chatBackdrop');
-  if(e.target === rev) closeRevisionModal();
-  if(e.target === chat) closeChatModal();
+  if(e.target === document.getElementById('revBackdrop')) closeRevisionModal();
+  if(e.target === document.getElementById('chatBackdrop')) closeChatModal();
 });
 </script>
 @endsection

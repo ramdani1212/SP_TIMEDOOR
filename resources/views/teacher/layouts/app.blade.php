@@ -9,22 +9,17 @@
 
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #E8F5E9; }
     .wrapper { display: flex; min-height: 100vh; }
-    .sidebar { 
-        width: 250px; 
-        background-color: #4CAF50;
-        color: white; 
-        padding: 20px; 
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        position: fixed;
-        height: 100%;
-        transition: width 0.3s ease, padding 0.3s ease;
-        overflow: hidden;
+
+    /* Sidebar */
+    .sidebar {
+        width: 250px; background-color: #4CAF50; color: white; padding: 20px;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1); position: fixed; height: 100%;
+        transition: width 0.3s ease, padding 0.3s ease; overflow: hidden;
     }
     .sidebar.closed { width: 0; padding: 0; }
     .logo-image { display: block; width: 150px; margin: 0 auto 30px auto; }
@@ -32,30 +27,75 @@
     .sidebar.closed h2, .sidebar.closed ul, .sidebar.closed .logout-form { display: none; }
     .sidebar ul { list-style: none; padding: 0; }
     .sidebar ul li { margin-bottom: 15px; }
-    .sidebar ul li a { 
-        color: white; text-decoration: none; display: block; padding: 10px; 
-        border-radius: 5px; white-space: nowrap; transition: background-color 0.3s, color 0.3s; 
+    .sidebar ul li a {
+        color: white; text-decoration: none; display: block; padding: 10px; border-radius: 5px;
+        white-space: nowrap; transition: background-color 0.3s, color 0.3s;
     }
     .sidebar ul li a i { margin-right: 10px; }
     .sidebar ul li a:hover, .sidebar ul li a.active { background-color: white; color: #4CAF50; }
-    .content { flex-grow: 1; padding: 40px; margin-left: 250px; transition: margin-left 0.3s ease; position: relative; }
+
+    /* Content */
+    .content {
+        flex-grow: 1; padding: 40px; margin-left: 250px; transition: margin-left 0.3s ease; position: relative;
+    }
     .content.full-width { margin-left: 0; }
 
+    /* Top header */
     .top-header {
         display: flex; justify-content: flex-end; align-items: center;
-        padding-bottom: 20px; border-bottom: 1px solid #ddd; margin-bottom: 20px;
+        gap: 12px; padding-bottom: 20px; border-bottom: 1px solid #ddd; margin-bottom: 20px;
     }
     .top-header a {
         text-decoration: none; color: white; background-color: #2196F3;
-        padding: 8px 15px; border-radius: 5px; margin-left: 10px; transition: background-color 0.3s ease;
+        padding: 8px 15px; border-radius: 5px; transition: background-color 0.3s ease;
     }
     .top-header a:hover { background-color: #1976D2; }
     .top-header .password-btn { background-color: #FF9800; }
     .top-header .password-btn:hover { background-color: #FB8C00; }
 
+    /* Bell + badge (H I J A U) */
+/* Bell btn simple (tanpa kotak) */
+    .bell-btn {
+        position: relative;
+        display: inline-block;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 5px;   /* kasih jarak dikit dari item lain */
+        text-decoration: none;
+    }
+
+    .bell-btn i {
+        color: #4CAF50 !important;   /* hijau fix */
+        font-size: 20px;             /* ukuran lebih kecil */
+        line-height: 1;
+    }
+
+    .bell-btn:hover i {
+        color: #3d8b40 !important;   /* hijau lebih tua pas hover */
+    }
+
+/* Badge */
+.badge-notif {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: #e53935;
+    color: #fff;
+    border-radius: 999px;
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 1;
+}
+
+
+    /* Spacing supaya card tidak nempel sidebar */
+    .page-container { max-width: 1100px; margin: 0 auto; padding-left: 10px; }
+    .card-spaced { margin-left: 6px; } /* ekstra kecil di dalam page */
+
     .logout-button { background-color: #f44336; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; display: block; width: 100%; margin-top: 20px; }
-    .dashboard-container { 
-        max-width: 900px; margin: 40px auto; padding: 20px; background-color: white; 
+    .dashboard-container {
+        max-width: 900px; margin: 40px auto; padding: 20px; background-color: white;
         border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border-top: 1px solid #ddd;
     }
     h1, h2 { color: #4CAF50; text-align: center; }
@@ -82,11 +122,6 @@
         box-shadow: 2px 0 5px rgba(0,0,0,0.1); transition: left 0.3s ease;
     }
     .sidebar.closed + .content .sidebar-toggle { left: 10px; }
-
-    /* Tambahan untuk ikon lonceng & badge */
-    .bell-btn { position: relative; background: transparent !important; color: #333 !important; padding: 0 !important; }
-    .bell-btn:hover { color: #000 !important; background: transparent !important; }
-    .badge-notif { position: absolute; top: -6px; right: -10px; background: #e53935; color: #fff; border-radius: 999px; padding: 2px 6px; font-size: 11px; line-height: 1; }
     </style>
 </head>
 <body>
@@ -105,9 +140,9 @@
 
         <div class="content" id="content">
             <button id="sidebarToggle" class="sidebar-toggle">«</button>
-            
+
             <div class="top-header">
-                {{-- Lonceng Notifikasi (pakai guard teacher) --}}
+                {{-- Lonceng Notifikasi (guard: teacher) --}}
                 @php
                   $tUser = Auth::guard('teacher')->user();
                   $tUnread = $tUser ? $tUser->unreadNotifications()->count() : 0;
@@ -119,7 +154,7 @@
                   @endif
                 </a>
 
-                {{-- Profil (pakai guard teacher) --}}
+                {{-- Profil --}}
                 @if(Auth::guard('teacher')->check())
                   <a href="{{ route('teacher.profile.show') }}" class="profile-btn">
                     <i class="fas fa-user-circle"></i> {{ $tUser->name }} | {{ $tUser->role }}
@@ -131,13 +166,16 @@
                 {{-- Ubah Password --}}
                 <a href="{{ route('teacher.password.edit') }}" class="password-btn" aria-label="Ubah Password"><i class="fas fa-key"></i></a>
             </div>
-            
-            <main class="py-4">
-                @yield('content')
-            </main>
+
+            {{-- beri sedikit container agar tidak nempel sidebar --}}
+            <div class="page-container card-spaced">
+              <main class="py-4">
+                  @yield('content')
+              </main>
+            </div>
         </div>
     </div>
-    
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const currentPath = window.location.href;
@@ -147,7 +185,7 @@
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
             const toggleButton = document.getElementById('sidebarToggle');
-            
+
             toggleButton.addEventListener('click', function() {
                 sidebar.classList.toggle('closed');
                 content.classList.toggle('full-width');
